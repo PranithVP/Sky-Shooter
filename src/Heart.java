@@ -1,39 +1,39 @@
-package application;
+
 
 import java.util.Random;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Fuel 
+public class Heart 
 {
 	// Declare and initialize global variables
 	private double xPos, yPos, width, height;
-	private Image imgFuel;
-	private ImageView ivFuel;
+	private Image imgHeart;
+	private ImageView ivHeart;
 	private Random rnd;
 	
-	// Constructor for fuel class
-	Fuel()
+	// Constructor for heart class
+	Heart()
 	{
 		// Initialize random object
 		rnd = new Random();
 		
-		// Initialize image and imageview of fuel, use image for imageview
-		imgFuel = new Image("file:images\\fuel.png");
-		ivFuel = new ImageView(imgFuel);
+		// Initialize image and imageview of heart, use image for imageview
+		imgHeart = new Image("file:images\\heart2.png");
+		ivHeart = new ImageView(imgHeart);
 		
 		// Assign default value for x and y position
 		xPos = 0;
 		yPos = 0;
 		
-		// Set width and height of fuel
-		width = imgFuel.getWidth();
-		height = imgFuel.getHeight();
+		// Set width and height of heart
+		width = imgHeart.getWidth();
+		height = imgHeart.getHeight();
 		
 		// Set x and y position of imageview
-		ivFuel.setX(xPos);
-		ivFuel.setY(yPos);
+		ivHeart.setX(xPos);
+		ivHeart.setY(yPos);
 	}
 	
 	// Method that sets x position
@@ -41,7 +41,7 @@ public class Fuel
 	{
 		// Set x position, update x position of imageview
 		xPos = x;
-		ivFuel.setX(xPos);
+		ivHeart.setX(xPos);
 	}
 	
 	// Method that sets y position
@@ -49,7 +49,7 @@ public class Fuel
 	{
 		// Set y position, update y position of imageview
 		yPos = y;
-		ivFuel.setY(yPos);
+		ivHeart.setY(yPos);
 	}
 	
 	// Method that sets location
@@ -60,8 +60,8 @@ public class Fuel
 		yPos = 0 - height;
 		
 		// Update x and y position of imageview
-		ivFuel.setX(xPos);
-		ivFuel.setY(yPos);
+		ivHeart.setX(xPos);
+		ivHeart.setY(yPos);
 	}
 	
 	// Method that returns x position
@@ -69,7 +69,7 @@ public class Fuel
 	{
 		return xPos;
 	}
-	
+
 	// Method that returns y position
 	public double getY()
 	{
@@ -91,14 +91,14 @@ public class Fuel
 	// Method that returns imageview
 	public ImageView getImage()
 	{
-		return ivFuel;
+		return ivHeart;
 	}
 	
-	// Method that moves fuel down
+	// Method that moves heart down
 	public void move()
 	{
 		// Set y position, update y position of image view
 		yPos += 3;
-		ivFuel.setY(yPos);
+		ivHeart.setY(yPos);
 	}
 }

@@ -1,39 +1,39 @@
-package application;
+
 
 import java.util.Random;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Star 
+public class Fuel 
 {
 	// Declare and initialize global variables
 	private double xPos, yPos, width, height;
-	private Image imgStar;
-	private ImageView ivStar;
+	private Image imgFuel;
+	private ImageView ivFuel;
 	private Random rnd;
 	
-	// Constructor for star class
-	Star()
+	// Constructor for fuel class
+	Fuel()
 	{
 		// Initialize random object
 		rnd = new Random();
 		
-		// Initialize image and imageview of star, use image for imageview
-		imgStar = new Image("file:images\\star.png");
-		ivStar = new ImageView(imgStar);
+		// Initialize image and imageview of fuel, use image for imageview
+		imgFuel = new Image("file:images\\fuel.png");
+		ivFuel = new ImageView(imgFuel);
 		
 		// Assign default value for x and y position
 		xPos = 0;
 		yPos = 0;
 		
-		// Set width and height of star
-		width = imgStar.getWidth();
-		height = imgStar.getHeight();
+		// Set width and height of fuel
+		width = imgFuel.getWidth();
+		height = imgFuel.getHeight();
 		
 		// Set x and y position of imageview
-		ivStar.setX(xPos);
-		ivStar.setY(yPos);
+		ivFuel.setX(xPos);
+		ivFuel.setY(yPos);
 	}
 	
 	// Method that sets x position
@@ -41,7 +41,7 @@ public class Star
 	{
 		// Set x position, update x position of imageview
 		xPos = x;
-		ivStar.setX(xPos);
+		ivFuel.setX(xPos);
 	}
 	
 	// Method that sets y position
@@ -49,7 +49,7 @@ public class Star
 	{
 		// Set y position, update y position of imageview
 		yPos = y;
-		ivStar.setY(yPos);
+		ivFuel.setY(yPos);
 	}
 	
 	// Method that sets location
@@ -60,8 +60,8 @@ public class Star
 		yPos = 0 - height;
 		
 		// Update x and y position of imageview
-		ivStar.setX(xPos);
-		ivStar.setY(yPos);
+		ivFuel.setX(xPos);
+		ivFuel.setY(yPos);
 	}
 	
 	// Method that returns x position
@@ -91,14 +91,14 @@ public class Star
 	// Method that returns imageview
 	public ImageView getImage()
 	{
-		return ivStar;
+		return ivFuel;
 	}
 	
-	// Method that moves star down
+	// Method that moves fuel down
 	public void move()
 	{
 		// Set y position, update y position of image view
 		yPos += 3;
-		ivStar.setY(yPos);
+		ivFuel.setY(yPos);
 	}
 }

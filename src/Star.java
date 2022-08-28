@@ -1,39 +1,39 @@
-package application;
+
 
 import java.util.Random;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Heart 
+public class Star 
 {
 	// Declare and initialize global variables
 	private double xPos, yPos, width, height;
-	private Image imgHeart;
-	private ImageView ivHeart;
+	private Image imgStar;
+	private ImageView ivStar;
 	private Random rnd;
 	
-	// Constructor for heart class
-	Heart()
+	// Constructor for star class
+	Star()
 	{
 		// Initialize random object
 		rnd = new Random();
 		
-		// Initialize image and imageview of heart, use image for imageview
-		imgHeart = new Image("file:images\\heart2.png");
-		ivHeart = new ImageView(imgHeart);
+		// Initialize image and imageview of star, use image for imageview
+		imgStar = new Image("file:images\\star.png");
+		ivStar = new ImageView(imgStar);
 		
 		// Assign default value for x and y position
 		xPos = 0;
 		yPos = 0;
 		
-		// Set width and height of heart
-		width = imgHeart.getWidth();
-		height = imgHeart.getHeight();
+		// Set width and height of star
+		width = imgStar.getWidth();
+		height = imgStar.getHeight();
 		
 		// Set x and y position of imageview
-		ivHeart.setX(xPos);
-		ivHeart.setY(yPos);
+		ivStar.setX(xPos);
+		ivStar.setY(yPos);
 	}
 	
 	// Method that sets x position
@@ -41,7 +41,7 @@ public class Heart
 	{
 		// Set x position, update x position of imageview
 		xPos = x;
-		ivHeart.setX(xPos);
+		ivStar.setX(xPos);
 	}
 	
 	// Method that sets y position
@@ -49,7 +49,7 @@ public class Heart
 	{
 		// Set y position, update y position of imageview
 		yPos = y;
-		ivHeart.setY(yPos);
+		ivStar.setY(yPos);
 	}
 	
 	// Method that sets location
@@ -60,8 +60,8 @@ public class Heart
 		yPos = 0 - height;
 		
 		// Update x and y position of imageview
-		ivHeart.setX(xPos);
-		ivHeart.setY(yPos);
+		ivStar.setX(xPos);
+		ivStar.setY(yPos);
 	}
 	
 	// Method that returns x position
@@ -69,7 +69,7 @@ public class Heart
 	{
 		return xPos;
 	}
-
+	
 	// Method that returns y position
 	public double getY()
 	{
@@ -91,14 +91,14 @@ public class Heart
 	// Method that returns imageview
 	public ImageView getImage()
 	{
-		return ivHeart;
+		return ivStar;
 	}
 	
-	// Method that moves heart down
+	// Method that moves star down
 	public void move()
 	{
 		// Set y position, update y position of image view
 		yPos += 3;
-		ivHeart.setY(yPos);
+		ivStar.setY(yPos);
 	}
 }
