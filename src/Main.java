@@ -1,5 +1,3 @@
-
-
 // Import necessary Java utilities and JavaFX components
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Random;
-
 import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
