@@ -50,8 +50,7 @@ public class Main extends Application
 	private Scene titleScreen, mapSelect, inGame, gameOver;
 	private Pane root;
 	private Random rnd;
-	private AnimationTimer movement;
-	private Timeline birdSpawnTimer, asteroidSpawnTimer, increaseSpeedTimer, powerupSpawnTimer, limitBulletTimer;
+	private Timeline airplaneMoveTimer, moveTimer, birdSpawnTimer, asteroidSpawnTimer, increaseSpeedTimer, powerupSpawnTimer, limitBulletTimer;
 	private int score, seconds, highScore, highestValueIndex;
 	private double health, asteroidSpeedX, asteroidSpeedY, asteroidSpawnSpeed, aircraftSpeed;
 	private boolean goUp, goDown, goLeft, goRight, space, noBirds, reachedFinalSpeed, limitBullets;
@@ -121,7 +120,7 @@ public class Main extends Application
 				// Create an alert informing the user of the controls and how to play, show alert
 				Alert alert = new Alert(AlertType.INFORMATION);
 				alert.setTitle("HOW TO PLAY");
-				alert.setContentText("Use arrow keys to move, and spacebar to shoot bullets. "
+				alert.setContentText("Use WASD to move, and spacebar to shoot bullets. "
 						+ "\n\nThe objective is to dodge and shoot obstacles for as long as possible. "
 						+ "Shooting has a cooldown of 1.25 seconds, and extra points are added if "
 						+ "an obstacle is shot rather than dodged. \n\nThe heart powerup adds 20% more "
@@ -561,140 +560,17 @@ public class Main extends Application
 				
 				// Set score and speed starting values for aircraft and asteroids
 				score = 0;
-				aircraftSpeed = 4;
+				aircraftSpeed = 0.055;
 				asteroidSpeedX = 0.5;
 				asteroidSpeedY = 1.25;
 				
 				// Initialize movement animation timer that calls handle method each frame
-				movement = new AnimationTimer()
+				// Start the AnimationTimer "movement"
+				
+				KeyFrame move = new KeyFrame(Duration.millis(17), new EventHandler<ActionEvent>()
 				{
-					// Called every frame that AnimationTimer is active
-					public void handle(long now) 
+					public void handle(ActionEvent arg0) 
 					{
-						// Check for key pressed events
-						inGame.setOnKeyPressed(new EventHandler<KeyEvent>() 
-						{
-							// Called when key event occurs
-							public void handle(KeyEvent e) 
-							{
-								// Check if the user presses right, goRight boolean to true
-								if (e.getCode() == KeyCode.RIGHT)
-								{
-									goRight = true;
-								}
-								// Check if the user presses left, goLeft boolean to true
-								if (e.getCode() == KeyCode.LEFT)
-								{
-									goLeft = true;
-								}
-								// Check if the user presses up, goUp boolean to true
-								if (e.getCode() == KeyCode.UP)
-								{
-									goUp = true;
-								}
-								// Check if the user presses down, goDown boolean to true
-								if (e.getCode() == KeyCode.DOWN)
-								{
-									goDown = true;
-								}
-								// Check if user presses space
-								if (e.getCode() == KeyCode.SPACE)
-								{
-									// Check if bullet cooldown is not active
-									if (limitBullets == false)
-									{
-										// Add new bullet to arraylist, set location and direction, add to root,
-										// set cooldown "limitBullets" to true, call limitBullets method
-										bullets.add(new Bullet());
-										bullets.get(bullets.size()-1).setLocationAndDirection(aircraft.getX(), aircraft.getY(), aircraft.getWidth(), aircraft.getHeight(), aircraft.getDirection());
-										root.getChildren().add(bullets.get(bullets.size()-1).getImage());
-										limitBullets = true;
-										limitBullets();
-									}
-								}
-							}
-						});
-						
-						// Check for key released events
-						inGame.setOnKeyReleased(new EventHandler<KeyEvent>() 
-						{
-							// Called when key event occurs
-							public void handle(KeyEvent e) 
-							{
-								// Check if the user releases right, set the goRight boolean to false
-								if (e.getCode() == KeyCode.RIGHT)
-								{
-									goRight = false;
-									aircraft.idle();
-								}
-								// Check if the user releases left, set the goLeft boolean to false
-								if (e.getCode() == KeyCode.LEFT)
-								{
-									goLeft = false;
-									aircraft.idle();
-								}
-								// Check if the user releases up, set the goUp boolean to false
-								if (e.getCode() == KeyCode.UP)
-								{
-									goUp = false;
-									aircraft.idle();
-								}
-								// Check if the user releases down, set the goDown boolean to false
-								if (e.getCode() == KeyCode.DOWN)
-								{
-									goDown = false;
-									aircraft.idle();
-								}
-							}
-						});
-						
-						// If the goUp boolean is true, move up
-						if (goUp == true)
-						{
-							aircraft.moveUp(aircraftSpeed);
-							
-							// Check top boundary, do not allow user to pass
-							if (aircraft.getY() < 0)
-							{
-								aircraft.setY(0);
-							}
-						}
-						// If the goDown boolean is true, move down
-						if (goDown == true)
-						{
-							aircraft.moveDown(aircraftSpeed);
-							
-							// Check bottom boundary, do not allow user to pass
-							if (aircraft.getY() + aircraft.getHeight() > inGame.getHeight())
-							{
-								aircraft.setY(inGame.getHeight() - aircraft.getHeight());
-							}
-						}
-						// If the goLeft boolean is true, move left
-						if (goLeft == true)
-						{
-							aircraft.moveLeft(aircraftSpeed);
-							
-							// Check left boundary, do not allow user to pass
-							if (aircraft.getX() < 0)
-							{
-								aircraft.setX(0);
-							}
-						}
-						// If the goRight boolean is true, move right
-						if (goRight == true)
-						{
-							aircraft.moveRight(aircraftSpeed);
-							
-							// Check right boundary, do not allow user to pass
-							if (aircraft.getX() + aircraft.getWidth() > inGame.getWidth())
-							{
-								aircraft.setX(inGame.getWidth() - aircraft.getWidth());
-							}
-						}
-						// Update aircraft imageview
-						aircraft.getImage();
-						
 						// Loop through each index in bullets arraylist
 						for (int i = 0; i < bullets.size(); i++)
 						{
@@ -722,16 +598,18 @@ public class Main extends Application
 						{
 							// Move asteroid at current index
 							asteroids.get(i).move();
-							
+
 							// If user touches left wall, change x direction so asteroid bounces
 							if (asteroids.get(i).getX() <= 0)
 							{
 								asteroids.get(i).changeXDir();
+								asteroids.get(i).move();
 							}
 							// If user touches right wall, change x direction so asteroid bounces
 							else if (asteroids.get(i).getX() + asteroids.get(i).getWidth() >= inGame.getWidth())
 							{
 								asteroids.get(i).changeXDir();
+								asteroids.get(i).move();
 							}
 						}
 						
@@ -743,7 +621,7 @@ public class Main extends Application
 							{
 								// Set spawn speed of asteroids, stop bird timers, and start increasing 
 								// frequency of asteroid spawns
-								asteroidSpawnSpeed = 1400;
+								asteroidSpawnSpeed = 1700;
 								birdSpawnTimer.stop();
 								increaseSpeedTimer.play();
 								createAsteroidSpawnTimer(asteroidSpawnSpeed);
@@ -769,17 +647,16 @@ public class Main extends Application
 						}
 						
 						// Check if there are still birds on screen
-						
 						if (noBirds == false)
 						{
 							// If there are no birds on screen, transition backgrounds
 							if (birds.size()-1 == 0)
 							{
-								// Create fade transition object with a 3000 ms duration that goes from 
+								// Create fade transition object with a 8s duration that goes from 
 								// full opacity to none. Set node to background image, so image transitions
 								// to space. Set noBirds boolean to true
 								FadeTransition fade = new FadeTransition();
-								fade.setDuration(Duration.millis(3000));
+								fade.setDuration(Duration.millis(8000));
 								fade.setFromValue(10);
 								fade.setToValue(0);
 								fade.setCycleCount(1);
@@ -978,10 +855,10 @@ public class Main extends Application
 								root.getChildren().remove(fuels.get(i).getImage());
 								fuels.remove(i);
 								
-								// Increase the aircraft's speed by 1.5 if the speed is below 9
-								if (aircraftSpeed < 9)
+								// Increase the aircraft's speed if the speed is below the limit
+								if (aircraftSpeed < 0.95)
 								{
-									aircraftSpeed += 1.5;
+									aircraftSpeed += 0.01;
 								}
 							}
 						}
@@ -996,7 +873,7 @@ public class Main extends Application
 						if (health <= 0.01)
 						{
 							// Stop all timers
-							movement.stop();
+							moveTimer.stop();
 							birdSpawnTimer.stop();
 							increaseSpeedTimer.stop();
 							powerupSpawnTimer.stop();
@@ -1014,10 +891,144 @@ public class Main extends Application
 							gameOver(primaryStage, enterName.getResult(), score);
 						}
 					}
-				};
-				// Start the AnimationTimer "movement"
-				movement.start();
-		
+				});
+				moveTimer = new Timeline(move);
+				moveTimer.setCycleCount(Timeline.INDEFINITE);
+				moveTimer.play();
+
+				KeyFrame airplaneMove = new KeyFrame(Duration.millis(0.1), new EventHandler<ActionEvent>()
+				{
+					public void handle(ActionEvent arg0) 
+					{
+						// Check for key pressed events
+						inGame.setOnKeyPressed(new EventHandler<KeyEvent>() 
+						{
+							// Called when key event occurs
+							public void handle(KeyEvent e) 
+							{
+								// Check if the user presses right, goRight boolean to true
+								if (e.getCode() == KeyCode.D)
+								{
+									goRight = true;
+								}
+								// Check if the user presses left, goLeft boolean to true
+								if (e.getCode() == KeyCode.A)
+								{
+									goLeft = true;
+								}
+								// Check if the user presses up, goUp boolean to true
+								if (e.getCode() == KeyCode.W)
+								{
+									goUp = true;
+								}
+								// Check if the user presses down, goDown boolean to true
+								if (e.getCode() == KeyCode.S)
+								{
+									goDown = true;
+								}
+								// Check if user presses space
+								if (e.getCode() == KeyCode.SPACE)
+								{
+									// Check if bullet cooldown is not active
+									if (limitBullets == false)
+									{
+										// Add new bullet to arraylist, set location and direction, add to root,
+										// set cooldown "limitBullets" to true, call limitBullets method
+										bullets.add(new Bullet());
+										bullets.get(bullets.size()-1).setLocationAndDirection(aircraft.getX(), aircraft.getY(), aircraft.getWidth(), aircraft.getHeight(), aircraft.getDirection());
+										root.getChildren().add(bullets.get(bullets.size()-1).getImage());
+										limitBullets = true;
+										limitBullets();
+									}
+								}
+							}
+						});
+						
+						// Check for key released events
+						inGame.setOnKeyReleased(new EventHandler<KeyEvent>() 
+						{
+							// Called when key event occurs
+							public void handle(KeyEvent e) 
+							{
+								// Check if the user releases right, set the goRight boolean to false
+								if (e.getCode() == KeyCode.D)
+								{
+									goRight = false;
+									aircraft.idle();
+								}
+								// Check if the user releases left, set the goLeft boolean to false
+								if (e.getCode() == KeyCode.A)
+								{
+									goLeft = false;
+									aircraft.idle();
+								}
+								// Check if the user releases up, set the goUp boolean to false
+								if (e.getCode() == KeyCode.W)
+								{
+									goUp = false;
+									aircraft.idle();
+								}
+								// Check if the user releases down, set the goDown boolean to false
+								if (e.getCode() == KeyCode.S)
+								{
+									goDown = false;
+									aircraft.idle();
+								}
+							}
+						});
+						
+						// If the goUp boolean is true, move up
+						if (goUp == true)
+						{
+							aircraft.moveUp(aircraftSpeed);
+							
+							// Check top boundary, do not allow user to pass
+							if (aircraft.getY() < 0)
+							{
+								aircraft.setY(0);
+							}
+						}
+						// If the goDown boolean is true, move down
+						if (goDown == true)
+						{
+							aircraft.moveDown(aircraftSpeed);
+							
+							// Check bottom boundary, do not allow user to pass
+							if (aircraft.getY() + aircraft.getHeight() > inGame.getHeight())
+							{
+								aircraft.setY(inGame.getHeight() - aircraft.getHeight());
+							}
+						}
+						// If the goLeft boolean is true, move left
+						if (goLeft == true)
+						{
+							aircraft.moveLeft(aircraftSpeed);
+							
+							// Check left boundary, do not allow user to pass
+							if (aircraft.getX() < 0)
+							{
+								aircraft.setX(0);
+							}
+						}
+						// If the goRight boolean is true, move right
+						if (goRight == true)
+						{
+							aircraft.moveRight(aircraftSpeed);
+							
+							// Check right boundary, do not allow user to pass
+							if (aircraft.getX() + aircraft.getWidth() > inGame.getWidth())
+							{
+								aircraft.setX(inGame.getWidth() - aircraft.getWidth());
+							}
+						}
+						// Update aircraft imageview
+						aircraft.getImage();
+					}
+				});
+				airplaneMoveTimer = new Timeline(airplaneMove);
+				airplaneMoveTimer.setCycleCount(Timeline.INDEFINITE);
+				airplaneMoveTimer.play();
+
 				// Initialize canvas and graphics context to scene's width and height
 				canvas = new Canvas(inGame.getWidth(), inGame.getHeight());
 				gc = canvas.getGraphicsContext2D();
@@ -1072,8 +1083,8 @@ public class Main extends Application
 				bullets = new ArrayList<Bullet>();
 				asteroids = new ArrayList<Asteroid>();
 				
-				// Create a keyframe that spawns a bird every 500 ms
-				KeyFrame kfBird = new KeyFrame(Duration.millis(500), new EventHandler<ActionEvent>() 
+				// Create a keyframe that spawns a bird every 600 ms
+				KeyFrame kfBird = new KeyFrame(Duration.millis(600), new EventHandler<ActionEvent>() 
 				{
 					public void handle(ActionEvent event) 
 					{
@@ -1088,8 +1099,8 @@ public class Main extends Application
 				birdSpawnTimer.setCycleCount(Timeline.INDEFINITE);
 				birdSpawnTimer.play();
 				
-				// Create a keyframe that increases asteroid spawn frequency with the duration of 999.9 milliseconds 
-				KeyFrame kfIncreaseSpeed = new KeyFrame(Duration.millis(999.9), new EventHandler<ActionEvent>() 
+				// Create a keyframe that increases asteroid spawn frequency with the duration of 1 seconds 
+				KeyFrame kfIncreaseSpeed = new KeyFrame(Duration.millis(1000), new EventHandler<ActionEvent>() 
 				{
 					public void handle(ActionEvent event) 
 					{	
@@ -1104,7 +1115,7 @@ public class Main extends Application
 							{
 								if (asteroidSpeedX <= 2.5)
 								{
-									asteroidSpeedX += 0.2;
+									asteroidSpeedX += 0.15;
 								}
 								// If x speed of asteroid is above 2.5, set reachedFinalSpeed to true
 								else
@@ -1116,7 +1127,7 @@ public class Main extends Application
 							// Increase y speed by 0.2 if below 3.5
 							if (asteroidSpeedY <= 3.5)
 							{
-								asteroidSpeedY += 0.2;
+								asteroidSpeedY += 0.15;
 							}
 						}
 						
@@ -1131,7 +1142,7 @@ public class Main extends Application
 							{
 								if (asteroidSpeedX <= 2.5)
 								{
-									asteroidSpeedX += 0.2;
+									asteroidSpeedX += 0.15;
 								}
 								// If x speed of asteroid is above 2.5, set reachedFinalSpeed to true
 								else
@@ -1142,17 +1153,17 @@ public class Main extends Application
 							// Increase y speed by 0.2 if below 3.5
 							if (asteroidSpeedY <= 3.5)
 							{
-								asteroidSpeedY += 0.2;
+								asteroidSpeedY += 0.15;
 							}
 							
-							// Decrease asteroid spawn frequency if above 600 ms
+							// Decrease asteroid spawn frequency if above 50 ms
 							if (asteroidSpawnSpeed > 600)
 							{
 								// Stop the asteroid spawn timer, decrease delay, call method to create new timer with 
 								// the new delay
 								asteroidSpawnTimer.pause();
 								asteroidSpawnTimer.stop();
-								asteroidSpawnSpeed -= 75;
+								asteroidSpawnSpeed -= 60;
 								createAsteroidSpawnTimer(asteroidSpawnSpeed);
 							}
 						}
@@ -1162,8 +1173,8 @@ public class Main extends Application
 				increaseSpeedTimer = new Timeline(kfIncreaseSpeed);
 				increaseSpeedTimer.setCycleCount(Timeline.INDEFINITE);
 				
-				// Create a keyframe that spawns powerups with the duration of 21 seconds 
-				KeyFrame kfSpawnPowerup = new KeyFrame(Duration.seconds(21), new EventHandler<ActionEvent>()
+				// Create a keyframe that spawns powerups with the duration of 20 seconds 
+				KeyFrame kfSpawnPowerup = new KeyFrame(Duration.seconds(20), new EventHandler<ActionEvent>()
 				{
 					public void handle(ActionEvent event) 
 					{
