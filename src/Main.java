@@ -65,6 +65,7 @@ public class Main extends Application
 	private GraphicsContext gc;
 	private Rectangle healthBar;
     private String highScoreName;
+	private String userName = "";
 	
 	public static void main(String[] args) 
 	{
@@ -362,12 +363,12 @@ public class Main extends Application
 		gc.strokeRect(mapSelect.getWidth()/2 + 15, mapSelect.getHeight()/2 + 15 + 35, 150, 150);
 		
 		// When user clicks each button, call inGame method with unique map accordingly
-		lblSky.setOnMouseClicked(e -> inGame(primaryStage, maps[0]));
-		lblNight.setOnMouseClicked(e -> inGame(primaryStage, maps[1]));
-		lblSunset.setOnMouseClicked(e -> inGame(primaryStage, maps[2]));
+		lblSky.setOnMouseClicked(e -> enterName(primaryStage, maps[0]));
+		lblNight.setOnMouseClicked(e -> enterName(primaryStage, maps[1]));
+		lblSunset.setOnMouseClicked(e -> enterName(primaryStage, maps[2]));
 		
 		// When user clicks random button, return a random map
-		lblRandom.setOnMouseClicked(e -> inGame(primaryStage, maps[rnd.nextInt(3)]));
+		lblRandom.setOnMouseClicked(e -> enterName(primaryStage, maps[rnd.nextInt(3)]));
 		
 		// Add canvas and labels to pane
 		mapRoot.getChildren().addAll(canvas, lblSky, lblNight, lblSunset, lblRandom, lblMapSelect);
@@ -452,771 +453,785 @@ public class Main extends Application
 		primaryStage.setTitle("SELECT MAP");
 	}
 	
-	// Method that creates, starts, and sets the scene to the game
-	public void inGame(Stage primaryStage, Image map)
-	{
-		// Create dialog that prompts user to enter their name
-		TextInputDialog enterName = new TextInputDialog();
-		enterName.setTitle("NAME");
-		enterName.setContentText("Please enter your name:   ");
-		enterName.setHeaderText(null);
-		
-		// Declare and initialize variables that check if input is correct
-		boolean isNumber = true;
-		boolean isBlank = true;
-		
-		// Show dialog, store result in Optional string object
-		Optional<String> result = enterName.showAndWait();
-		
-		// Execute code if result exists
-		if (result.isPresent())
+	// Method that allows the user to enter their name
+	public void enterName(Stage primaryStage, Image map)
+	{	
+		if (userName.equals(""))
 		{
-			// Loop through each index of user's input in the dialog
-			for (int i = 0; i < enterName.getResult().length(); i++)
+			// Create dialog that prompts user to enter their name
+			TextInputDialog enterName = new TextInputDialog();
+			enterName.setTitle("NAME");
+			enterName.setContentText("Please enter your name:   ");
+			enterName.setHeaderText(null);
+			
+			// Declare and initialize variables that check if input is correct
+			boolean isNumber = true;
+			boolean isBlank = true;
+			
+			// Show dialog, store result in Optional string object
+			Optional<String> result = enterName.showAndWait();
+			
+			// Execute code if result exists
+			if (result.isPresent())
 			{
-				// Check if character at current index is a digit
-				if (Character.isDigit(enterName.getResult().charAt(i)))
+				// Loop through each index of user's input in the dialog
+				for (int i = 0; i < enterName.getResult().length(); i++)
 				{
-					// Display alert that informs the user not to enter digits
-					// set isNumber boolean to true, break out of loop
+					// Check if character at current index is a digit
+					if (Character.isDigit(enterName.getResult().charAt(i)))
+					{
+						// Display alert that informs the user not to enter digits
+						// set isNumber boolean to true, break out of loop
+						Alert alert = new Alert(AlertType.ERROR);
+						alert.setContentText("Please do not enter digits!");
+						alert.setHeaderText(null);
+						alert.setTitle("ERROR!");
+						alert.showAndWait();
+						isNumber = true;
+						break;
+					}
+					// if character at current index is not a digit
+					else
+					{
+						// Set isNumber boolean to false
+						isNumber = false;
+					}
+				}
+				
+				// Check if user's input in dialog is blank or null
+				if (enterName.getResult().equals("") == true && enterName.getResult() != null)
+				{
+					// Display alert that informs the user to enter a name,
+					// set isBlank boolean to true, break out of loop
 					Alert alert = new Alert(AlertType.ERROR);
-					alert.setContentText("Please do not enter digits!");
+					alert.setContentText("Please enter a name!");
 					alert.setHeaderText(null);
 					alert.setTitle("ERROR!");
 					alert.showAndWait();
-					isNumber = true;
-					break;
+					isBlank = true;
 				}
-				// if character at current index is not a digit
+				// If input is not blank
 				else
 				{
-					// Set isNumber boolean to false
-					isNumber = false;
+					// Set isBlank boolean to false
+					isBlank = false;
 				}
 			}
 			
-			// Check if user's input in dialog is blank or null
-			if (enterName.getResult().equals("") == true && enterName.getResult() != null)
+			// If the user's input is not a number and is not blank, execute code
+			if (!isNumber && !isBlank)
 			{
-				// Display alert that informs the user to enter a name,
-				// set isBlank boolean to true, break out of loop
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setContentText("Please enter a name!");
-				alert.setHeaderText(null);
-				alert.setTitle("ERROR!");
-				alert.showAndWait();
-				isBlank = true;
-			}
-			// If input is not blank
-			else
-			{
-				// Set isBlank boolean to false
-				isBlank = false;
+				// If the user has entered any input, execute code
+				if (result.isPresent())
+				{	
+					userName = enterName.getResult();
+					inGame(primaryStage, map, userName);
+				}
 			}
 		}
-		
-		// If the user's input is not a number and is not blank, execute code
-		if (!isNumber && !isBlank)
+		else
 		{
-			// If the user has entered any input, execute code
-			if (result.isPresent())
-			{
-				// Initialize variables to default values that allow the game to function
-				health = 1;
-				seconds = 0;
-				space = false;
-				noBirds = true;
-				reachedFinalSpeed = false;
-				limitBullets = false;
-				
-				// Initialize random object
-				rnd = new Random();
-				
-				// Declare and initialize 2d array "scoreAmounts" containing different possible amounts for the				
-				// star powerup to add to user's score
-				int[][] scoreAmounts = 
-				{ 	
-					{300, 350, 400}, // SMALL SCORE BOOST
-					{700, 750, 800}, // MEDIUM SCORE BOOST
-					{1100, 1150, 1200} // LARGE SCORE BOOST
-				};
-				
-				// Declare and initialize two image and imageview variables, set one image to the image from parameter
-				// of the inGame method, and intialize other to the space background
-				Image imgBack = map;
-				Image imgBack2 = new Image("file:images\\space.png");
-				ImageView ivBack = new ImageView(imgBack);
-				ImageView ivBack2 = new ImageView(imgBack2);
-				
-				// Initialize pane root, add both backgrounds (first one in front), and initialize scene
-				// to contain root with the dimensions of imgBack
-				root = new Pane();
-				root.getChildren().addAll(ivBack2, ivBack);
-				inGame = new Scene(root, imgBack.getWidth(), imgBack.getHeight());
-				
-				// Create and instantiate aircraft object, add image of object to root
-				Aircraft aircraft = new Aircraft();
-				root.getChildren().add(aircraft.getImage());
-				
-				// Set score and speed starting values for aircraft and asteroids
-				score = 0;
-				aircraftSpeed = 0.055;
-				asteroidSpeedX = 0.5;
-				asteroidSpeedY = 1.25;
-				
-				// Initialize movement animation timer that calls handle method each frame
-				// Start the AnimationTimer "movement"
-				
-				KeyFrame move = new KeyFrame(Duration.millis(17), new EventHandler<ActionEvent>()
-				{
-					public void handle(ActionEvent arg0) 
-					{
-						// Loop through each index in bullets arraylist
-						for (int i = 0; i < bullets.size(); i++)
-						{
-							// Move bullet at current index, update imageview
-							bullets.get(i).move();
-							bullets.get(i).getImage();
-						}
-						
-						// Loop through each index in birds arraylist
-						for (int i = 0; i < birds.size(); i++)
-						{
-							// Move bird at current index
-							birds.get(i).move();
-							
-							// Remove bird at current index if past bottom of the screen
-							if (birds.get(i).getY() > inGame.getHeight())
-							{
-								root.getChildren().remove(birds.get(i).getImage());
-								birds.remove(i);
-							}
-						}
-						
-						// Loop through each index in asteroids arraylist
-						for (int i = 0; i < asteroids.size(); i++)
-						{
-							// Move asteroid at current index
-							asteroids.get(i).move();
+			inGame(primaryStage, map, userName);
+		}
+	}
 
-							// If user touches left wall, change x direction so asteroid bounces
-							if (asteroids.get(i).getX() <= 0)
-							{
-								asteroids.get(i).changeXDir();
-								asteroids.get(i).move();
-							}
-							// If user touches right wall, change x direction so asteroid bounces
-							else if (asteroids.get(i).getX() + asteroids.get(i).getWidth() >= inGame.getWidth())
-							{
-								asteroids.get(i).changeXDir();
-								asteroids.get(i).move();
-							}
-						}
+	// Method that creates, starts, and sets the scene to the game
+	public void inGame(Stage primaryStage, Image map, String name)
+	{	
+		// Initialize variables to default values that allow the game to function
+		health = 1;
+		seconds = 0;
+		space = false;
+		noBirds = true;
+		reachedFinalSpeed = false;
+		limitBullets = false;
+		
+		// Initialize random object
+		rnd = new Random();
+		
+		// Declare and initialize 2d array "scoreAmounts" containing different possible amounts for the				
+		// star powerup to add to user's score
+		int[][] scoreAmounts = 
+		{ 	
+			{300, 350, 400}, // SMALL SCORE BOOST
+			{700, 750, 800}, // MEDIUM SCORE BOOST
+			{1100, 1150, 1200} // LARGE SCORE BOOST
+		};
+		
+		// Declare and initialize two image and imageview variables, set one image to the image from parameter
+		// of the inGame method, and intialize other to the space background
+		Image imgBack = map;
+		Image imgBack2 = new Image("file:images\\space.png");
+		ImageView ivBack = new ImageView(imgBack);
+		ImageView ivBack2 = new ImageView(imgBack2);
+		
+		// Initialize pane root, add both backgrounds (first one in front), and initialize scene
+		// to contain root with the dimensions of imgBack
+		root = new Pane();
+		root.getChildren().addAll(ivBack2, ivBack);
+		inGame = new Scene(root, imgBack.getWidth(), imgBack.getHeight());
+		
+		// Create and instantiate aircraft object, add image of object to root
+		Aircraft aircraft = new Aircraft();
+		root.getChildren().add(aircraft.getImage());
+		
+		// Set score and speed starting values for aircraft and asteroids
+		score = 0;
+		aircraftSpeed = 0.055;
+		asteroidSpeedX = 0.5;
+		asteroidSpeedY = 1.25;
+		
+		// Initialize movement animation timer that calls handle method each frame
+		// Start the AnimationTimer "movement"
+		
+		KeyFrame move = new KeyFrame(Duration.millis(17), new EventHandler<ActionEvent>()
+		{
+			public void handle(ActionEvent arg0) 
+			{
+				// Loop through each index in bullets arraylist
+				for (int i = 0; i < bullets.size(); i++)
+				{
+					// Move bullet at current index, update imageview
+					bullets.get(i).move();
+					bullets.get(i).getImage();
+				}
+				
+				// Loop through each index in birds arraylist
+				for (int i = 0; i < birds.size(); i++)
+				{
+					// Move bird at current index
+					birds.get(i).move();
+					
+					// Remove bird at current index if past bottom of the screen
+					if (birds.get(i).getY() > inGame.getHeight())
+					{
+						root.getChildren().remove(birds.get(i).getImage());
+						birds.remove(i);
+					}
+				}
+				
+				// Loop through each index in asteroids arraylist
+				for (int i = 0; i < asteroids.size(); i++)
+				{
+					// Move asteroid at current index
+					asteroids.get(i).move();
+
+					// If user touches left wall, change x direction so asteroid bounces
+					if (asteroids.get(i).getX() <= 0)
+					{
+						asteroids.get(i).changeXDir();
+						asteroids.get(i).move();
+					}
+					// If user touches right wall, change x direction so asteroid bounces
+					else if (asteroids.get(i).getX() + asteroids.get(i).getWidth() >= inGame.getWidth())
+					{
+						asteroids.get(i).changeXDir();
+						asteroids.get(i).move();
+					}
+				}
+				
+				// Check if background is not already space
+				if (space == false)
+				{
+					// If user's score passes 1250, stop spawning birds and change to space
+					if (score >= 1250)
+					{
+						// Set spawn speed of asteroids, stop bird timers, and start increasing 
+						// frequency of asteroid spawns
+						asteroidSpawnSpeed = 1700;
+						birdSpawnTimer.stop();
+						increaseSpeedTimer.play();
+						createAsteroidSpawnTimer(asteroidSpawnSpeed);
 						
-						// Check if background is not already space
-						if (space == false)
+						// Set space to true and noBirds to false
+						space = true;
+						noBirds = false;
+					}
+				}
+				else
+				{
+					for (int i = 0; i < asteroids.size(); i++)
+					{
+						// MOVE EVERY ASTEROID
+						asteroids.get(i).move();
+						// IF ASTEROID PASSES BOTTOM OF SCREEN, REMOVE
+						if (asteroids.get(i).getY() > inGame.getHeight())
 						{
-							// If user's score passes 1250, stop spawning birds and change to space
-							if (score >= 1250)
-							{
-								// Set spawn speed of asteroids, stop bird timers, and start increasing 
-								// frequency of asteroid spawns
-								asteroidSpawnSpeed = 1700;
-								birdSpawnTimer.stop();
-								increaseSpeedTimer.play();
-								createAsteroidSpawnTimer(asteroidSpawnSpeed);
-								
-								// Set space to true and noBirds to false
-								space = true;
-								noBirds = false;
-							}
+							root.getChildren().remove(asteroids.get(i).getImage());
+							asteroids.remove(i);
 						}
+					}
+				}
+				
+				// Check if there are still birds on screen
+				if (noBirds == false)
+				{
+					// If there are no birds on screen, transition backgrounds
+					if (birds.size()-1 == 0)
+					{
+						// Create fade transition object with a 8s duration that goes from 
+						// full opacity to none. Set node to background image, so image transitions
+						// to space. Set noBirds boolean to true
+						FadeTransition fade = new FadeTransition();
+						fade.setDuration(Duration.millis(8000));
+						fade.setFromValue(10);
+						fade.setToValue(0);
+						fade.setCycleCount(1);
+						fade.setNode(ivBack);
+						fade.play();
+						noBirds = true;
+					}
+				}
+				
+				// Loop through each index of stars arraylist
+				for(int i = 0; i < stars.size(); i++)
+				{
+					// Move star at current index, update imageview
+					stars.get(i).move();
+					stars.get(i).getImage();
+					
+					// If star passes bottom boundary, remove star object from arraylist and pane
+					if (stars.get(i).getY() > inGame.getHeight())
+					{
+						root.getChildren().remove(stars.get(i).getImage());
+						stars.remove(i);
+					}
+				}
+				
+				// Loop through each index of hearts arraylist
+				for(int i = 0; i < hearts.size(); i++)
+				{
+					// Move heart at current index, update imageview
+					hearts.get(i).move();
+					hearts.get(i).getImage();
+					
+					// If heart passes bottom boundary, remove heart object from arraylist and pane
+					if (hearts.get(i).getY() > inGame.getHeight())
+					{
+						root.getChildren().remove(hearts.get(i).getImage());
+						hearts.remove(i);
+					}
+				}
+				
+				// Loop through each index of fuels arraylist
+				for(int i = 0; i < fuels.size(); i++)
+				{
+					// Move fuel at current index, update imageview
+					fuels.get(i).move();
+					fuels.get(i).getImage();
+					
+					// If fuel passes bottom boundary, remove fuel object from arraylist and pane
+					if (fuels.get(i).getY() > inGame.getHeight())
+					{
+						root.getChildren().remove(fuels.get(i).getImage());
+						fuels.remove(i);
+					}
+				}
+				
+				// Loop through each index of bullets arraylist
+				for (int i = 0; i < bullets.size(); i++)
+				{
+					// If fuel passes bottom boundary, remove fuel object from arraylist and pane
+					if (bullets.get(i).getX() < -bullets.get(i).getWidth() || bullets.get(i).getY() < -bullets.get(i).getHeight() || bullets.get(i).getX() > inGame.getWidth())
+					{
+						root.getChildren().remove(bullets.get(i).getImage());
+						bullets.remove(i);
+					}
+				}
+				
+				// Loop through each index of birds arraylist
+				for (int i = 0; i < birds.size(); i++)
+				{
+					// Check intersection of aircraft image and bird image at current index
+					if(aircraft.getImage().getBoundsInParent().intersects(birds.get(i).getImage().getBoundsInParent()))
+					{
+						// Remove bird from arraylist and pane, decrease health by 20%
+						root.getChildren().remove(birds.get(i).getImage());
+						birds.remove(i);
+						health -= 0.2;
+					}
+				}
+				
+				// Loop through each index of birds arraylist
+				for (int i = 0; i < birds.size(); i++)
+				{
+					// Loop through each index of bullets arraylist
+					for (int j = 0; j < bullets.size(); j++)
+					{
+						// Check intersection of bird image at current index and bullet image at current index
+						if(bullets.get(j).getImage().getBoundsInParent().intersects(birds.get(i).getImage().getBoundsInParent()))
+						{
+							// Remove bird and bullet from arraylist and pane, increase score by 100
+							root.getChildren().remove(birds.get(i).getImage());
+							birds.remove(i);
+							root.getChildren().remove(bullets.get(j).getImage());
+							bullets.remove(j);
+							score += 100;
+						}
+					}
+				}
+				
+				// Loop through each index of asteroids arraylist
+				for (int i = 0; i < asteroids.size(); i++)
+				{
+					// Loop through each index of bullets arraylist
+					for (int j = 0; j < bullets.size(); j++)
+					{
+						// Check intersection of asteroid image at current index and bullet image at current index
+						if(bullets.get(j).getImage().getBoundsInParent().intersects(asteroids.get(i).getImage().getBoundsInParent()))
+						{
+							// Remove asteroid and bullet from arraylist and pane, increase score by 150
+							root.getChildren().remove(asteroids.get(i).getImage());
+							asteroids.remove(i);
+							root.getChildren().remove(bullets.get(j).getImage());
+							bullets.remove(j);
+							score += 150;
+						}
+					}
+				}
+				
+				// Loop through each index of asteroids arraylist
+				for (int i = 0; i < asteroids.size(); i++)
+				{
+					// Check intersection of aircraft and asteroid image at current index 
+					if(aircraft.getImage().getBoundsInParent().intersects(asteroids.get(i).getImage().getBoundsInParent()))
+					{
+						// Remove asteroid from arraylist and pane, decrease health by 20%
+						root.getChildren().remove(asteroids.get(i).getImage());
+						asteroids.remove(i);
+						health -= 0.2;
+					}
+				}
+				
+				// Loop through each index of hearts arraylist
+				for (int i = 0; i < hearts.size(); i++)
+				{
+					// Check intersection of aircraft and heart image at current index 
+					if(aircraft.getImage().getBoundsInParent().intersects(hearts.get(i).getImage().getBoundsInParent()))
+					{
+						// Remove heart from arraylist and pane
+						root.getChildren().remove(hearts.get(i).getImage());
+						hearts.remove(i);
+						
+						// If health is below 80%, add 20%
+						if (health <= 0.8)
+						{
+							health += 0.2;
+						}
+						// If health is over 80%, set to 100%
 						else
 						{
-							for (int i = 0; i < asteroids.size(); i++)
-							{
-								// MOVE EVERY ASTEROID
-								asteroids.get(i).move();
-								// IF ASTEROID PASSES BOTTOM OF SCREEN, REMOVE
-								if (asteroids.get(i).getY() > inGame.getHeight())
-								{
-									root.getChildren().remove(asteroids.get(i).getImage());
-									asteroids.remove(i);
-								}
-							}
-						}
-						
-						// Check if there are still birds on screen
-						if (noBirds == false)
-						{
-							// If there are no birds on screen, transition backgrounds
-							if (birds.size()-1 == 0)
-							{
-								// Create fade transition object with a 8s duration that goes from 
-								// full opacity to none. Set node to background image, so image transitions
-								// to space. Set noBirds boolean to true
-								FadeTransition fade = new FadeTransition();
-								fade.setDuration(Duration.millis(8000));
-								fade.setFromValue(10);
-								fade.setToValue(0);
-								fade.setCycleCount(1);
-								fade.setNode(ivBack);
-								fade.play();
-								noBirds = true;
-							}
-						}
-						
-						// Loop through each index of stars arraylist
-						for(int i = 0; i < stars.size(); i++)
-						{
-							// Move star at current index, update imageview
-							stars.get(i).move();
-							stars.get(i).getImage();
-							
-							// If star passes bottom boundary, remove star object from arraylist and pane
-							if (stars.get(i).getY() > inGame.getHeight())
-							{
-								root.getChildren().remove(stars.get(i).getImage());
-								stars.remove(i);
-							}
-						}
-						
-						// Loop through each index of hearts arraylist
-						for(int i = 0; i < hearts.size(); i++)
-						{
-							// Move heart at current index, update imageview
-							hearts.get(i).move();
-							hearts.get(i).getImage();
-							
-							// If heart passes bottom boundary, remove heart object from arraylist and pane
-							if (hearts.get(i).getY() > inGame.getHeight())
-							{
-								root.getChildren().remove(hearts.get(i).getImage());
-								hearts.remove(i);
-							}
-						}
-						
-						// Loop through each index of fuels arraylist
-						for(int i = 0; i < fuels.size(); i++)
-						{
-							// Move fuel at current index, update imageview
-							fuels.get(i).move();
-							fuels.get(i).getImage();
-							
-							// If fuel passes bottom boundary, remove fuel object from arraylist and pane
-							if (fuels.get(i).getY() > inGame.getHeight())
-							{
-								root.getChildren().remove(fuels.get(i).getImage());
-								fuels.remove(i);
-							}
-						}
-						
-						// Loop through each index of bullets arraylist
-						for (int i = 0; i < bullets.size(); i++)
-						{
-							// If fuel passes bottom boundary, remove fuel object from arraylist and pane
-							if (bullets.get(i).getX() < -bullets.get(i).getWidth() || bullets.get(i).getY() < -bullets.get(i).getHeight() || bullets.get(i).getX() > inGame.getWidth())
-							{
-								root.getChildren().remove(bullets.get(i).getImage());
-								bullets.remove(i);
-							}
-						}
-						
-						// Loop through each index of birds arraylist
-						for (int i = 0; i < birds.size(); i++)
-						{
-							// Check intersection of aircraft image and bird image at current index
-							if(aircraft.getImage().getBoundsInParent().intersects(birds.get(i).getImage().getBoundsInParent()))
-							{
-								// Remove bird from arraylist and pane, decrease health by 20%
-								root.getChildren().remove(birds.get(i).getImage());
-								birds.remove(i);
-								health -= 0.2;
-							}
-						}
-						
-						// Loop through each index of birds arraylist
-						for (int i = 0; i < birds.size(); i++)
-						{
-							// Loop through each index of bullets arraylist
-							for (int j = 0; j < bullets.size(); j++)
-							{
-								// Check intersection of bird image at current index and bullet image at current index
-								if(bullets.get(j).getImage().getBoundsInParent().intersects(birds.get(i).getImage().getBoundsInParent()))
-								{
-									// Remove bird and bullet from arraylist and pane, increase score by 100
-									root.getChildren().remove(birds.get(i).getImage());
-									birds.remove(i);
-									root.getChildren().remove(bullets.get(j).getImage());
-									bullets.remove(j);
-									score += 100;
-								}
-							}
-						}
-						
-						// Loop through each index of asteroids arraylist
-						for (int i = 0; i < asteroids.size(); i++)
-						{
-							// Loop through each index of bullets arraylist
-							for (int j = 0; j < bullets.size(); j++)
-							{
-								// Check intersection of asteroid image at current index and bullet image at current index
-								if(bullets.get(j).getImage().getBoundsInParent().intersects(asteroids.get(i).getImage().getBoundsInParent()))
-								{
-									// Remove asteroid and bullet from arraylist and pane, increase score by 150
-									root.getChildren().remove(asteroids.get(i).getImage());
-									asteroids.remove(i);
-									root.getChildren().remove(bullets.get(j).getImage());
-									bullets.remove(j);
-									score += 150;
-								}
-							}
-						}
-						
-						// Loop through each index of asteroids arraylist
-						for (int i = 0; i < asteroids.size(); i++)
-						{
-							// Check intersection of aircraft and asteroid image at current index 
-							if(aircraft.getImage().getBoundsInParent().intersects(asteroids.get(i).getImage().getBoundsInParent()))
-							{
-								// Remove asteroid from arraylist and pane, decrease health by 20%
-								root.getChildren().remove(asteroids.get(i).getImage());
-								asteroids.remove(i);
-								health -= 0.2;
-							}
-						}
-						
-						// Loop through each index of hearts arraylist
-						for (int i = 0; i < hearts.size(); i++)
-						{
-							// Check intersection of aircraft and heart image at current index 
-							if(aircraft.getImage().getBoundsInParent().intersects(hearts.get(i).getImage().getBoundsInParent()))
-							{
-								// Remove heart from arraylist and pane
-								root.getChildren().remove(hearts.get(i).getImage());
-								hearts.remove(i);
-								
-								// If health is below 80%, add 20%
-								if (health <= 0.8)
-								{
-									health += 0.2;
-								}
-								// If health is over 80%, set to 100%
-								else
-								{
-									health = 1;
-								}
-							}
-						}
-						
-						// Loop through each index of stars arraylist
-						for (int i = 0; i < stars.size(); i++)
-						{
-							// Check intersection of aircraft and star image at current index
-							if(aircraft.getImage().getBoundsInParent().intersects(stars.get(i).getImage().getBoundsInParent()))
-							{
-								// Remove star from arraylist and pane
-								root.getChildren().remove(stars.get(i).getImage());
-								stars.remove(i);
-								
-								// Declare and initialize amount to add to score, randomize row and column
-								int addToScore = 0;
-								int row = rnd.nextInt(scoreAmounts.length);
-								int col = rnd.nextInt(scoreAmounts[row].length);
-								
-								// If the first row is selected, add 100 plus the random amount of score
-								if (row == 0)
-								{
-									addToScore = scoreAmounts[row][col] + 100;
-								}
-								// If the second row is selected, add 100 plus the random amount of score
-								else if (row == 1)
-								{
-									addToScore = scoreAmounts[row][col] + 250;
-								}
-								// If the third row is selected, add 100 plus the random amount of score
-								else
-								{
-									addToScore = scoreAmounts[row][col] + 500;
-								}
-								
-								// Add addToScore to user's score
-								score += addToScore;
-							}
-						}
-						
-						// Loop through each index of fuels arraylist
-						for (int i = 0; i < fuels.size(); i++)
-						{
-							// Check intersection of aircraft and fuel image at current index
-							if(aircraft.getImage().getBoundsInParent().intersects(fuels.get(i).getImage().getBoundsInParent()))
-							{
-								// Remove fuel from arraylist and pane
-								root.getChildren().remove(fuels.get(i).getImage());
-								fuels.remove(i);
-								
-								// Increase the aircraft's speed if the speed is below the limit
-								if (aircraftSpeed < 0.95)
-								{
-									aircraftSpeed += 0.01;
-								}
-							}
-						}
-						
-						// Constantly update the score, healthbar object's width according
-						// to user's health and score label's text to user's score
-						healthBar.setWidth(172*(health));
-						score += 1;
-						lblScore.setText(""+ score);
-						
-						// Check if user drops below 0 health
-						if (health <= 0.01)
-						{
-							// Stop all timers
-							moveTimer.stop();
-							birdSpawnTimer.stop();
-							increaseSpeedTimer.stop();
-							powerupSpawnTimer.stop();
-							if (space == true)
-							{
-								asteroidSpawnTimer.stop();
-							}
-							
-							// Call gameOver method for user's name and score
-							aircraft.idle();
-							goUp = false;
-							goDown = false;
-							goLeft = false;
-							goRight = false;
-							gameOver(primaryStage, enterName.getResult(), score);
+							health = 1;
 						}
 					}
-				});
-				moveTimer = new Timeline(move);
-				moveTimer.setCycleCount(Timeline.INDEFINITE);
-				moveTimer.play();
-
-				KeyFrame airplaneMove = new KeyFrame(Duration.millis(0.1), new EventHandler<ActionEvent>()
+				}
+				
+				// Loop through each index of stars arraylist
+				for (int i = 0; i < stars.size(); i++)
 				{
-					public void handle(ActionEvent arg0) 
+					// Check intersection of aircraft and star image at current index
+					if(aircraft.getImage().getBoundsInParent().intersects(stars.get(i).getImage().getBoundsInParent()))
 					{
-						// Check for key pressed events
-						inGame.setOnKeyPressed(new EventHandler<KeyEvent>() 
-						{
-							// Called when key event occurs
-							public void handle(KeyEvent e) 
-							{
-								// Check if the user presses right, goRight boolean to true
-								if (e.getCode() == KeyCode.D)
-								{
-									goRight = true;
-								}
-								// Check if the user presses left, goLeft boolean to true
-								if (e.getCode() == KeyCode.A)
-								{
-									goLeft = true;
-								}
-								// Check if the user presses up, goUp boolean to true
-								if (e.getCode() == KeyCode.W)
-								{
-									goUp = true;
-								}
-								// Check if the user presses down, goDown boolean to true
-								if (e.getCode() == KeyCode.S)
-								{
-									goDown = true;
-								}
-								// Check if user presses space
-								if (e.getCode() == KeyCode.SPACE)
-								{
-									// Check if bullet cooldown is not active
-									if (limitBullets == false)
-									{
-										// Add new bullet to arraylist, set location and direction, add to root,
-										// set cooldown "limitBullets" to true, call limitBullets method
-										bullets.add(new Bullet());
-										bullets.get(bullets.size()-1).setLocationAndDirection(aircraft.getX(), aircraft.getY(), aircraft.getWidth(), aircraft.getHeight(), aircraft.getDirection());
-										root.getChildren().add(bullets.get(bullets.size()-1).getImage());
-										limitBullets = true;
-										limitBullets();
-									}
-								}
-							}
-						});
+						// Remove star from arraylist and pane
+						root.getChildren().remove(stars.get(i).getImage());
+						stars.remove(i);
 						
-						// Check for key released events
-						inGame.setOnKeyReleased(new EventHandler<KeyEvent>() 
-						{
-							// Called when key event occurs
-							public void handle(KeyEvent e) 
-							{
-								// Check if the user releases right, set the goRight boolean to false
-								if (e.getCode() == KeyCode.D)
-								{
-									goRight = false;
-									aircraft.idle();
-								}
-								// Check if the user releases left, set the goLeft boolean to false
-								if (e.getCode() == KeyCode.A)
-								{
-									goLeft = false;
-									aircraft.idle();
-								}
-								// Check if the user releases up, set the goUp boolean to false
-								if (e.getCode() == KeyCode.W)
-								{
-									goUp = false;
-									aircraft.idle();
-								}
-								// Check if the user releases down, set the goDown boolean to false
-								if (e.getCode() == KeyCode.S)
-								{
-									goDown = false;
-									aircraft.idle();
-								}
-							}
-						});
+						// Declare and initialize amount to add to score, randomize row and column
+						int addToScore = 0;
+						int row = rnd.nextInt(scoreAmounts.length);
+						int col = rnd.nextInt(scoreAmounts[row].length);
 						
-						// If the goUp boolean is true, move up
-						if (goUp == true)
+						// If the first row is selected, add 100 plus the random amount of score
+						if (row == 0)
 						{
-							aircraft.moveUp(aircraftSpeed);
-							
-							// Check top boundary, do not allow user to pass
-							if (aircraft.getY() < 0)
-							{
-								aircraft.setY(0);
-							}
+							addToScore = scoreAmounts[row][col] + 100;
 						}
-						// If the goDown boolean is true, move down
-						if (goDown == true)
+						// If the second row is selected, add 100 plus the random amount of score
+						else if (row == 1)
 						{
-							aircraft.moveDown(aircraftSpeed);
-							
-							// Check bottom boundary, do not allow user to pass
-							if (aircraft.getY() + aircraft.getHeight() > inGame.getHeight())
-							{
-								aircraft.setY(inGame.getHeight() - aircraft.getHeight());
-							}
+							addToScore = scoreAmounts[row][col] + 250;
 						}
-						// If the goLeft boolean is true, move left
-						if (goLeft == true)
+						// If the third row is selected, add 100 plus the random amount of score
+						else
 						{
-							aircraft.moveLeft(aircraftSpeed);
-							
-							// Check left boundary, do not allow user to pass
-							if (aircraft.getX() < 0)
-							{
-								aircraft.setX(0);
-							}
+							addToScore = scoreAmounts[row][col] + 500;
 						}
-						// If the goRight boolean is true, move right
-						if (goRight == true)
-						{
-							aircraft.moveRight(aircraftSpeed);
-							
-							// Check right boundary, do not allow user to pass
-							if (aircraft.getX() + aircraft.getWidth() > inGame.getWidth())
-							{
-								aircraft.setX(inGame.getWidth() - aircraft.getWidth());
-							}
-						}
-						// Update aircraft imageview
-						aircraft.getImage();
+						
+						// Add addToScore to user's score
+						score += addToScore;
 					}
-				});
-				airplaneMoveTimer = new Timeline(airplaneMove);
-				airplaneMoveTimer.setCycleCount(Timeline.INDEFINITE);
-				airplaneMoveTimer.play();
-
-				// Initialize canvas and graphics context to scene's width and height
-				canvas = new Canvas(inGame.getWidth(), inGame.getHeight());
-				gc = canvas.getGraphicsContext2D();
+				}
 				
-				// Create a label that informs the user of their score that is black with white text
-				lblScore = new Label();
-				lblScore.setText("" + score);
-				lblScore.setFont(Font.font("Brittanic", FontWeight.BOLD, 25));
-				lblScore.setTextFill(Color.WHITE);
-				lblScore.setLayoutX(10);
-				lblScore.setLayoutY(10);
-				lblScore.setAlignment(Pos.CENTER);
-				lblScore.setPrefSize(125, 40);
-				lblScore.setStyle("-fx-background-color: BLACK");
-				
-				// Stroke a rounded rectangle outline in the canvas around the score label
-				gc.setStroke(Color.WHITE);
-				gc.setLineWidth(3);
-				gc.strokeRoundRect(10, 10, 125, 40, 10, 10);
-				
-				// Add label to pane
-				root.getChildren().add(lblScore);
-				
-				// Initialize Rectangle object for health bar
-				healthBar = new Rectangle(172, 28, Color.RED);
-				healthBar.setLayoutX(inGame.getWidth() - 188 - 3);
-				healthBar.setLayoutY(15);
-				
-				// Stroke a rounded rectangle outline in the canvas around healthbar object
-				gc.setStroke(Color.BLACK);
-				gc.setLineWidth(3);
-				gc.strokeRoundRect(inGame.getWidth() - 194, 15, 176, 28, 10, 10);
-				
-				// Add healthbar and canvas to pane
-				root.getChildren().addAll(healthBar, canvas);
-				
-				// Create heart image, use for imageview
-				Image imgHeart = new Image("file:images\\heart.png");
-				ImageView ivHeart = new ImageView(imgHeart);
-				
-				// Set dimensions and location of heart, add to pane
-				ivHeart.setFitHeight(51);
-				ivHeart.setX(inGame.getWidth() - 188 - 36);
-				ivHeart.setY(5);
-				root.getChildren().add(ivHeart);
-				
-				// Initialize arraylist of each object
-				stars = new ArrayList<Star>();
-				hearts = new ArrayList<Heart>();
-				fuels = new ArrayList<Fuel>();
-				birds = new ArrayList<Bird>();
-				bullets = new ArrayList<Bullet>();
-				asteroids = new ArrayList<Asteroid>();
-				
-				// Create a keyframe that spawns a bird every 600 ms
-				KeyFrame kfBird = new KeyFrame(Duration.millis(600), new EventHandler<ActionEvent>() 
+				// Loop through each index of fuels arraylist
+				for (int i = 0; i < fuels.size(); i++)
 				{
-					public void handle(ActionEvent event) 
+					// Check intersection of aircraft and fuel image at current index
+					if(aircraft.getImage().getBoundsInParent().intersects(fuels.get(i).getImage().getBoundsInParent()))
 					{
-						// Add a new bird to the birds arraylist, set the location, add image to pane
-						birds.add(new Bird());
-						birds.get(birds.size()-1).setLocation((int)inGame.getWidth(), (int)inGame.getHeight());
-						root.getChildren().add(birds.get(birds.size()-1).getImage());
-					}	
-				});
-				// Initialize timeline that uses kfBird keyframe, play indefinitely
-				birdSpawnTimer = new Timeline(kfBird);
-				birdSpawnTimer.setCycleCount(Timeline.INDEFINITE);
-				birdSpawnTimer.play();
-				
-				// Create a keyframe that increases asteroid spawn frequency with the duration of 1 seconds 
-				KeyFrame kfIncreaseSpeed = new KeyFrame(Duration.millis(1000), new EventHandler<ActionEvent>() 
-				{
-					public void handle(ActionEvent event) 
-					{	
-						// Add to seconds variable
-						seconds++;
+						// Remove fuel from arraylist and pane
+						root.getChildren().remove(fuels.get(i).getImage());
+						fuels.remove(i);
 						
-						// On the third second, execute code
-						if (seconds == 3)
+						// Increase the aircraft's speed if the speed is below the limit
+						if (aircraftSpeed < 0.95)
 						{
-							// If this is the and the final speed has not been reached, increase x speed
-							if (!reachedFinalSpeed)
-							{
-								if (asteroidSpeedX <= 2.5)
-								{
-									asteroidSpeedX += 0.15;
-								}
-								// If x speed of asteroid is above 2.5, set reachedFinalSpeed to true
-								else
-								{
-									reachedFinalSpeed = true;
-								}
-							}
-							
-							// Increase y speed by 0.2 if below 3.5
-							if (asteroidSpeedY <= 3.5)
-							{
-								asteroidSpeedY += 0.15;
-							}
-						}
-						
-						// On the sixth second, execute code
-						if (seconds >= 6)
-						{
-							// Reset seconds variable
-							seconds = 0;
-							
-							// If this is the and the final speed has not been reached, increase x speed
-							if (!reachedFinalSpeed)
-							{
-								if (asteroidSpeedX <= 2.5)
-								{
-									asteroidSpeedX += 0.15;
-								}
-								// If x speed of asteroid is above 2.5, set reachedFinalSpeed to true
-								else
-								{
-									reachedFinalSpeed = true;
-								}
-							}
-							// Increase y speed by 0.2 if below 3.5
-							if (asteroidSpeedY <= 3.5)
-							{
-								asteroidSpeedY += 0.15;
-							}
-							
-							// Decrease asteroid spawn frequency if above 50 ms
-							if (asteroidSpawnSpeed > 600)
-							{
-								// Stop the asteroid spawn timer, decrease delay, call method to create new timer with 
-								// the new delay
-								asteroidSpawnTimer.pause();
-								asteroidSpawnTimer.stop();
-								asteroidSpawnSpeed -= 60;
-								createAsteroidSpawnTimer(asteroidSpawnSpeed);
-							}
-						}
-					}	
-				});
-				// Initialize timeline increaseSpeedTimer, set cycle count to indefinite
-				increaseSpeedTimer = new Timeline(kfIncreaseSpeed);
-				increaseSpeedTimer.setCycleCount(Timeline.INDEFINITE);
-				
-				// Create a keyframe that spawns powerups with the duration of 20 seconds 
-				KeyFrame kfSpawnPowerup = new KeyFrame(Duration.seconds(20), new EventHandler<ActionEvent>()
-				{
-					public void handle(ActionEvent event) 
-					{
-						// Choose random integer between 1 to 3
-						int spawnPowerup = rnd.nextInt(3) + 1;
-						
-						// If random number is 1, spawn star powerup
-						if (spawnPowerup == 1)
-						{
-							// Add star to arraylist and pane, set location of star
-							stars.add(new Star());
-							stars.get(stars.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
-							root.getChildren().add(stars.get(stars.size()-1).getImage());
-						}
-						// If random number is 2, spawn heart powerup
-						else if (spawnPowerup == 2)
-						{
-							// Add fuel to arraylist and pane, set location of fuel
-							hearts.add(new Heart());
-							hearts.get(hearts.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
-							root.getChildren().add(hearts.get(hearts.size()-1).getImage());
-						}
-						// If random number is 3, spawn fuel powerup
-						else if (spawnPowerup == 3)
-						{
-							// Add fuel to arraylist and pane, set location of fuel
-							fuels.add(new Fuel());
-							fuels.get(fuels.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
-							root.getChildren().add(fuels.get(fuels.size()-1).getImage());
+							aircraftSpeed += 0.01;
 						}
 					}
-				});
-				// Initialize timeline using kfSpawnPowerup keyframe, set cycle count to indefinite, play timer
-				powerupSpawnTimer = new Timeline(kfSpawnPowerup);
-				powerupSpawnTimer.setCycleCount(Timeline.INDEFINITE);
-				powerupSpawnTimer.play();
+				}
 				
-				// Set stage's scene to inGame, clear title
-				primaryStage.setScene(inGame);
-				primaryStage.setTitle("");
+				// Constantly update the score, healthbar object's width according
+				// to user's health and score label's text to user's score
+				healthBar.setWidth(172*(health));
+				score += 1;
+				lblScore.setText(""+ score);
+				
+				// Check if user drops below 0 health
+				if (health <= 0.01)
+				{
+					// Stop all timers
+					moveTimer.stop();
+					birdSpawnTimer.stop();
+					increaseSpeedTimer.stop();
+					powerupSpawnTimer.stop();
+					if (space == true)
+					{
+						asteroidSpawnTimer.stop();
+					}
+					
+					// Call gameOver method for user's name and score
+					aircraft.idle();
+					goUp = false;
+					goDown = false;
+					goLeft = false;
+					goRight = false;
+					gameOver(primaryStage, userName, score);
+				}
 			}
-		}
+		});
+		moveTimer = new Timeline(move);
+		moveTimer.setCycleCount(Timeline.INDEFINITE);
+		moveTimer.play();
+
+		KeyFrame airplaneMove = new KeyFrame(Duration.millis(0.1), new EventHandler<ActionEvent>()
+		{
+			public void handle(ActionEvent arg0) 
+			{
+				// Check for key pressed events
+				inGame.setOnKeyPressed(new EventHandler<KeyEvent>() 
+				{
+					// Called when key event occurs
+					public void handle(KeyEvent e) 
+					{
+						// Check if the user presses right, goRight boolean to true
+						if (e.getCode() == KeyCode.D)
+						{
+							goRight = true;
+						}
+						// Check if the user presses left, goLeft boolean to true
+						if (e.getCode() == KeyCode.A)
+						{
+							goLeft = true;
+						}
+						// Check if the user presses up, goUp boolean to true
+						if (e.getCode() == KeyCode.W)
+						{
+							goUp = true;
+						}
+						// Check if the user presses down, goDown boolean to true
+						if (e.getCode() == KeyCode.S)
+						{
+							goDown = true;
+						}
+						// Check if user presses space
+						if (e.getCode() == KeyCode.SPACE)
+						{
+							// Check if bullet cooldown is not active
+							if (limitBullets == false)
+							{
+								// Add new bullet to arraylist, set location and direction, add to root,
+								// set cooldown "limitBullets" to true, call limitBullets method
+								bullets.add(new Bullet());
+								bullets.get(bullets.size()-1).setLocationAndDirection(aircraft.getX(), aircraft.getY(), aircraft.getWidth(), aircraft.getHeight(), aircraft.getDirection());
+								root.getChildren().add(bullets.get(bullets.size()-1).getImage());
+								limitBullets = true;
+								limitBullets();
+							}
+						}
+					}
+				});
+				
+				// Check for key released events
+				inGame.setOnKeyReleased(new EventHandler<KeyEvent>() 
+				{
+					// Called when key event occurs
+					public void handle(KeyEvent e) 
+					{
+						// Check if the user releases right, set the goRight boolean to false
+						if (e.getCode() == KeyCode.D)
+						{
+							goRight = false;
+							aircraft.idle();
+						}
+						// Check if the user releases left, set the goLeft boolean to false
+						if (e.getCode() == KeyCode.A)
+						{
+							goLeft = false;
+							aircraft.idle();
+						}
+						// Check if the user releases up, set the goUp boolean to false
+						if (e.getCode() == KeyCode.W)
+						{
+							goUp = false;
+							aircraft.idle();
+						}
+						// Check if the user releases down, set the goDown boolean to false
+						if (e.getCode() == KeyCode.S)
+						{
+							goDown = false;
+							aircraft.idle();
+						}
+					}
+				});
+				
+				// If the goUp boolean is true, move up
+				if (goUp == true)
+				{
+					aircraft.moveUp(aircraftSpeed);
+					
+					// Check top boundary, do not allow user to pass
+					if (aircraft.getY() < 0)
+					{
+						aircraft.setY(0);
+					}
+				}
+				// If the goDown boolean is true, move down
+				if (goDown == true)
+				{
+					aircraft.moveDown(aircraftSpeed);
+					
+					// Check bottom boundary, do not allow user to pass
+					if (aircraft.getY() + aircraft.getHeight() > inGame.getHeight())
+					{
+						aircraft.setY(inGame.getHeight() - aircraft.getHeight());
+					}
+				}
+				// If the goLeft boolean is true, move left
+				if (goLeft == true)
+				{
+					aircraft.moveLeft(aircraftSpeed);
+					
+					// Check left boundary, do not allow user to pass
+					if (aircraft.getX() < 0)
+					{
+						aircraft.setX(0);
+					}
+				}
+				// If the goRight boolean is true, move right
+				if (goRight == true)
+				{
+					aircraft.moveRight(aircraftSpeed);
+					
+					// Check right boundary, do not allow user to pass
+					if (aircraft.getX() + aircraft.getWidth() > inGame.getWidth())
+					{
+						aircraft.setX(inGame.getWidth() - aircraft.getWidth());
+					}
+				}
+				// Update aircraft imageview
+				aircraft.getImage();
+			}
+		});
+		airplaneMoveTimer = new Timeline(airplaneMove);
+		airplaneMoveTimer.setCycleCount(Timeline.INDEFINITE);
+		airplaneMoveTimer.play();
+
+		// Initialize canvas and graphics context to scene's width and height
+		canvas = new Canvas(inGame.getWidth(), inGame.getHeight());
+		gc = canvas.getGraphicsContext2D();
+		
+		// Create a label that informs the user of their score that is black with white text
+		lblScore = new Label();
+		lblScore.setText("" + score);
+		lblScore.setFont(Font.font("Brittanic", FontWeight.BOLD, 25));
+		lblScore.setTextFill(Color.WHITE);
+		lblScore.setLayoutX(10);
+		lblScore.setLayoutY(10);
+		lblScore.setAlignment(Pos.CENTER);
+		lblScore.setPrefSize(125, 40);
+		lblScore.setStyle("-fx-background-color: BLACK");
+		
+		// Stroke a rounded rectangle outline in the canvas around the score label
+		gc.setStroke(Color.WHITE);
+		gc.setLineWidth(3);
+		gc.strokeRoundRect(10, 10, 125, 40, 10, 10);
+		
+		// Add label to pane
+		root.getChildren().add(lblScore);
+		
+		// Initialize Rectangle object for health bar
+		healthBar = new Rectangle(172, 28, Color.RED);
+		healthBar.setLayoutX(inGame.getWidth() - 188 - 3);
+		healthBar.setLayoutY(15);
+		
+		// Stroke a rounded rectangle outline in the canvas around healthbar object
+		gc.setStroke(Color.BLACK);
+		gc.setLineWidth(3);
+		gc.strokeRoundRect(inGame.getWidth() - 194, 15, 176, 28, 10, 10);
+		
+		// Add healthbar and canvas to pane
+		root.getChildren().addAll(healthBar, canvas);
+		
+		// Create heart image, use for imageview
+		Image imgHeart = new Image("file:images\\heart.png");
+		ImageView ivHeart = new ImageView(imgHeart);
+		
+		// Set dimensions and location of heart, add to pane
+		ivHeart.setFitHeight(51);
+		ivHeart.setX(inGame.getWidth() - 188 - 36);
+		ivHeart.setY(5);
+		root.getChildren().add(ivHeart);
+		
+		// Initialize arraylist of each object
+		stars = new ArrayList<Star>();
+		hearts = new ArrayList<Heart>();
+		fuels = new ArrayList<Fuel>();
+		birds = new ArrayList<Bird>();
+		bullets = new ArrayList<Bullet>();
+		asteroids = new ArrayList<Asteroid>();
+		
+		// Create a keyframe that spawns a bird every 600 ms
+		KeyFrame kfBird = new KeyFrame(Duration.millis(600), new EventHandler<ActionEvent>() 
+		{
+			public void handle(ActionEvent event) 
+			{
+				// Add a new bird to the birds arraylist, set the location, add image to pane
+				birds.add(new Bird());
+				birds.get(birds.size()-1).setLocation((int)inGame.getWidth(), (int)inGame.getHeight());
+				root.getChildren().add(birds.get(birds.size()-1).getImage());
+			}	
+		});
+		// Initialize timeline that uses kfBird keyframe, play indefinitely
+		birdSpawnTimer = new Timeline(kfBird);
+		birdSpawnTimer.setCycleCount(Timeline.INDEFINITE);
+		birdSpawnTimer.play();
+		
+		// Create a keyframe that increases asteroid spawn frequency with the duration of 1 seconds 
+		KeyFrame kfIncreaseSpeed = new KeyFrame(Duration.millis(1000), new EventHandler<ActionEvent>() 
+		{
+			public void handle(ActionEvent event) 
+			{	
+				// Add to seconds variable
+				seconds++;
+				
+				// On the third second, execute code
+				if (seconds == 3)
+				{
+					// If this is the and the final speed has not been reached, increase x speed
+					if (!reachedFinalSpeed)
+					{
+						if (asteroidSpeedX <= 2.5)
+						{
+							asteroidSpeedX += 0.15;
+						}
+						// If x speed of asteroid is above 2.5, set reachedFinalSpeed to true
+						else
+						{
+							reachedFinalSpeed = true;
+						}
+					}
+					
+					// Increase y speed by 0.2 if below 3.5
+					if (asteroidSpeedY <= 3.5)
+					{
+						asteroidSpeedY += 0.15;
+					}
+				}
+				
+				// On the sixth second, execute code
+				if (seconds >= 6)
+				{
+					// Reset seconds variable
+					seconds = 0;
+					
+					// If this is the and the final speed has not been reached, increase x speed
+					if (!reachedFinalSpeed)
+					{
+						if (asteroidSpeedX <= 2.5)
+						{
+							asteroidSpeedX += 0.15;
+						}
+						// If x speed of asteroid is above 2.5, set reachedFinalSpeed to true
+						else
+						{
+							reachedFinalSpeed = true;
+						}
+					}
+					// Increase y speed by 0.2 if below 3.5
+					if (asteroidSpeedY <= 3.5)
+					{
+						asteroidSpeedY += 0.15;
+					}
+					
+					// Decrease asteroid spawn frequency if above 50 ms
+					if (asteroidSpawnSpeed > 600)
+					{
+						// Stop the asteroid spawn timer, decrease delay, call method to create new timer with 
+						// the new delay
+						asteroidSpawnTimer.pause();
+						asteroidSpawnTimer.stop();
+						asteroidSpawnSpeed -= 60;
+						createAsteroidSpawnTimer(asteroidSpawnSpeed);
+					}
+				}
+			}	
+		});
+		// Initialize timeline increaseSpeedTimer, set cycle count to indefinite
+		increaseSpeedTimer = new Timeline(kfIncreaseSpeed);
+		increaseSpeedTimer.setCycleCount(Timeline.INDEFINITE);
+		
+		// Create a keyframe that spawns powerups with the duration of 20 seconds 
+		KeyFrame kfSpawnPowerup = new KeyFrame(Duration.seconds(20), new EventHandler<ActionEvent>()
+		{
+			public void handle(ActionEvent event) 
+			{
+				// Choose random integer between 1 to 3
+				int spawnPowerup = rnd.nextInt(3) + 1;
+				
+				// If random number is 1, spawn star powerup
+				if (spawnPowerup == 1)
+				{
+					// Add star to arraylist and pane, set location of star
+					stars.add(new Star());
+					stars.get(stars.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
+					root.getChildren().add(stars.get(stars.size()-1).getImage());
+				}
+				// If random number is 2, spawn heart powerup
+				else if (spawnPowerup == 2)
+				{
+					// Add fuel to arraylist and pane, set location of fuel
+					hearts.add(new Heart());
+					hearts.get(hearts.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
+					root.getChildren().add(hearts.get(hearts.size()-1).getImage());
+				}
+				// If random number is 3, spawn fuel powerup
+				else if (spawnPowerup == 3)
+				{
+					// Add fuel to arraylist and pane, set location of fuel
+					fuels.add(new Fuel());
+					fuels.get(fuels.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
+					root.getChildren().add(fuels.get(fuels.size()-1).getImage());
+				}
+			}
+		});
+		// Initialize timeline using kfSpawnPowerup keyframe, set cycle count to indefinite, play timer
+		powerupSpawnTimer = new Timeline(kfSpawnPowerup);
+		powerupSpawnTimer.setCycleCount(Timeline.INDEFINITE);
+		powerupSpawnTimer.play();
+		
+		// Set stage's scene to inGame, clear title
+		primaryStage.setScene(inGame);
+		primaryStage.setTitle("");
 	}
 	
 	// Method that creates and sets the scene to the game over screen
