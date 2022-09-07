@@ -50,8 +50,8 @@ public class Main extends Application
 	private Scene titleScreen, mapSelect, inGame, gameOver;
 	private Pane root;
 	private Random rnd;
-	private Timeline airplaneMoveTimer, moveTimer, birdSpawnTimer, asteroidSpawnTimer, increaseSpeedTimer, powerupSpawnTimer, limitBulletTimer;
-	private int score, seconds, highScore, highestValueIndex;
+	private Timeline airplaneMoveTimer, moveTimer, birdSpawnTimer, asteroidSpawnTimer, increaseSpeedTimer, powerupSpawnTimer, limitBulletTimer, lightningTimer;
+	private int score, seconds, highScore, highestValueIndex, thirdSeconds;
 	private double health, asteroidSpeedX, asteroidSpeedY, asteroidSpawnSpeed, aircraftSpeed;
 	private boolean goUp, goDown, goLeft, goRight, space, noBirds, reachedFinalSpeed, limitBullets;
 	private ArrayList<Bird> birds;
@@ -59,6 +59,7 @@ public class Main extends Application
 	private ArrayList<Star> stars;
 	private ArrayList<Heart> hearts;
 	private ArrayList<Fuel> fuels;
+	private ArrayList<Lightning> lightnings;
 	private ArrayList<Bullet> bullets;
 	private Label lblScore;
 	private Canvas canvas;
@@ -633,8 +634,8 @@ public class Main extends Application
 				// Check if background is not already space
 				if (space == false)
 				{
-					// If user's score passes 1250, stop spawning birds and change to space
-					if (score >= 1250)
+					// If user's score passes 1500, stop spawning birds and change to space
+					if (score >= 1500)
 					{
 						// Set spawn speed of asteroids, stop bird timers, and start increasing 
 						// frequency of asteroid spawns
@@ -669,11 +670,11 @@ public class Main extends Application
 					// If there are no birds on screen, transition backgrounds
 					if (birds.size()-1 == 0)
 					{
-						// Create fade transition object with a 8s duration that goes from 
+						// Create fade transition object with a 5s duration that goes from 
 						// full opacity to none. Set node to background image, so image transitions
 						// to space. Set noBirds boolean to true
 						FadeTransition fade = new FadeTransition();
-						fade.setDuration(Duration.millis(8000));
+						fade.setDuration(Duration.millis(5000));
 						fade.setFromValue(10);
 						fade.setToValue(0);
 						fade.setCycleCount(1);
@@ -727,6 +728,21 @@ public class Main extends Application
 						fuels.remove(i);
 					}
 				}
+
+				// Loop through each index of lightnings arraylist
+				for(int i = 0; i < lightnings.size(); i++)
+				{
+					// Move lightning at current index, update imageview
+					lightnings.get(i).move();
+					lightnings.get(i).getImage();
+					
+					// If lightning passes bottom boundary, remove fuel object from arraylist and pane
+					if (lightnings.get(i).getY() > inGame.getHeight())
+					{
+						root.getChildren().remove(lightnings.get(i).getImage());
+						lightnings.remove(i);
+					}
+				}
 				
 				// Loop through each index of bullets arraylist
 				for (int i = 0; i < bullets.size(); i++)
@@ -743,7 +759,7 @@ public class Main extends Application
 				for (int i = 0; i < birds.size(); i++)
 				{
 					// Check intersection of aircraft image and bird image at current index
-					if(aircraft.getImage().getBoundsInParent().intersects(birds.get(i).getImage().getBoundsInParent()))
+					if (aircraft.getImage().getBoundsInParent().intersects(birds.get(i).getImage().getBoundsInParent()))
 					{
 						// Remove bird from arraylist and pane, decrease health by 20%
 						root.getChildren().remove(birds.get(i).getImage());
@@ -759,7 +775,7 @@ public class Main extends Application
 					for (int j = 0; j < bullets.size(); j++)
 					{
 						// Check intersection of bird image at current index and bullet image at current index
-						if(bullets.get(j).getImage().getBoundsInParent().intersects(birds.get(i).getImage().getBoundsInParent()))
+						if (bullets.get(j).getImage().getBoundsInParent().intersects(birds.get(i).getImage().getBoundsInParent()))
 						{
 							// Remove bird and bullet from arraylist and pane, increase score by 100
 							root.getChildren().remove(birds.get(i).getImage());
@@ -771,30 +787,34 @@ public class Main extends Application
 					}
 				}
 				
-				// Loop through each index of asteroids arraylist
-				for (int i = 0; i < asteroids.size(); i++)
+				try
 				{
-					// Loop through each index of bullets arraylist
-					for (int j = 0; j < bullets.size(); j++)
+					// Loop through each index of asteroids arraylist
+					for (int i = 0; i < bullets.size(); i++)
 					{
-						// Check intersection of asteroid image at current index and bullet image at current index
-						if(bullets.get(j).getImage().getBoundsInParent().intersects(asteroids.get(i).getImage().getBoundsInParent()))
+						// Loop through each index of bullets arraylist
+						for (int j = 0; j < asteroids.size(); j++)
 						{
-							// Remove asteroid and bullet from arraylist and pane, increase score by 150
-							root.getChildren().remove(asteroids.get(i).getImage());
-							asteroids.remove(i);
-							root.getChildren().remove(bullets.get(j).getImage());
-							bullets.remove(j);
-							score += 150;
+							// Check intersection of asteroid image at current index and bullet image at current index
+							if (bullets.get(i).getImage().getBoundsInParent().intersects(asteroids.get(j).getImage().getBoundsInParent()))
+							{
+								// Remove asteroid and bullet from arraylist and pane, increase score by 150
+								root.getChildren().remove(asteroids.get(j).getImage());
+								asteroids.remove(j);
+								root.getChildren().remove(bullets.get(i).getImage());
+								bullets.remove(i);
+								score += 150;
+							}
 						}
 					}
 				}
+				catch (IndexOutOfBoundsException e) {}
 				
 				// Loop through each index of asteroids arraylist
 				for (int i = 0; i < asteroids.size(); i++)
 				{
 					// Check intersection of aircraft and asteroid image at current index 
-					if(aircraft.getImage().getBoundsInParent().intersects(asteroids.get(i).getImage().getBoundsInParent()))
+					if (aircraft.getImage().getBoundsInParent().intersects(asteroids.get(i).getImage().getBoundsInParent()))
 					{
 						// Remove asteroid from arraylist and pane, decrease health by 20%
 						root.getChildren().remove(asteroids.get(i).getImage());
@@ -807,7 +827,7 @@ public class Main extends Application
 				for (int i = 0; i < hearts.size(); i++)
 				{
 					// Check intersection of aircraft and heart image at current index 
-					if(aircraft.getImage().getBoundsInParent().intersects(hearts.get(i).getImage().getBoundsInParent()))
+					if (aircraft.getImage().getBoundsInParent().intersects(hearts.get(i).getImage().getBoundsInParent()))
 					{
 						// Remove heart from arraylist and pane
 						root.getChildren().remove(hearts.get(i).getImage());
@@ -830,7 +850,7 @@ public class Main extends Application
 				for (int i = 0; i < stars.size(); i++)
 				{
 					// Check intersection of aircraft and star image at current index
-					if(aircraft.getImage().getBoundsInParent().intersects(stars.get(i).getImage().getBoundsInParent()))
+					if (aircraft.getImage().getBoundsInParent().intersects(stars.get(i).getImage().getBoundsInParent()))
 					{
 						// Remove star from arraylist and pane
 						root.getChildren().remove(stars.get(i).getImage());
@@ -866,7 +886,7 @@ public class Main extends Application
 				for (int i = 0; i < fuels.size(); i++)
 				{
 					// Check intersection of aircraft and fuel image at current index
-					if(aircraft.getImage().getBoundsInParent().intersects(fuels.get(i).getImage().getBoundsInParent()))
+					if (aircraft.getImage().getBoundsInParent().intersects(fuels.get(i).getImage().getBoundsInParent()))
 					{
 						// Remove fuel from arraylist and pane
 						root.getChildren().remove(fuels.get(i).getImage());
@@ -877,6 +897,41 @@ public class Main extends Application
 						{
 							aircraftSpeed += 0.01;
 						}
+					}
+				}
+
+				// Loop through each index of lightnings arraylist
+				for (int i = 0; i < lightnings.size(); i++)
+				{
+					// Check intersection of aircraft and fuel image at current index
+					if (aircraft.getImage().getBoundsInParent().intersects(lightnings.get(i).getImage().getBoundsInParent()))
+					{
+						// Remove fuel from arraylist and pane
+						root.getChildren().remove(lightnings.get(i).getImage());
+						lightnings.remove(i);
+						
+						thirdSeconds = 0;
+						KeyFrame kfLightning = new KeyFrame(Duration.millis(333), new EventHandler<ActionEvent>()
+						{
+							public void handle(ActionEvent arg0) 
+							{
+								thirdSeconds++;
+								bullets.add(new Bullet());
+								bullets.get(bullets.size()-1).setLocationAndDirection(aircraft.getX(), aircraft.getY(), aircraft.getWidth(), aircraft.getHeight(), aircraft.getDirection());
+								root.getChildren().add(bullets.get(bullets.size()-1).getImage());
+
+								if (thirdSeconds > 54)
+								{
+									lightningTimer.stop();
+									thirdSeconds = 0;
+								}
+							}
+						});
+						limitBullets = true;
+						limitBullets(18000);
+						lightningTimer = new Timeline(kfLightning);
+						lightningTimer.setCycleCount(Timeline.INDEFINITE);
+						lightningTimer.play();
 					}
 				}
 				
@@ -955,7 +1010,7 @@ public class Main extends Application
 								bullets.get(bullets.size()-1).setLocationAndDirection(aircraft.getX(), aircraft.getY(), aircraft.getWidth(), aircraft.getHeight(), aircraft.getDirection());
 								root.getChildren().add(bullets.get(bullets.size()-1).getImage());
 								limitBullets = true;
-								limitBullets();
+								limitBullets(1250);
 							}
 						}
 					}
@@ -1096,6 +1151,7 @@ public class Main extends Application
 		stars = new ArrayList<Star>();
 		hearts = new ArrayList<Heart>();
 		fuels = new ArrayList<Fuel>();
+		lightnings = new ArrayList<Lightning>();
 		birds = new ArrayList<Bird>();
 		bullets = new ArrayList<Bullet>();
 		asteroids = new ArrayList<Asteroid>();
@@ -1196,7 +1252,7 @@ public class Main extends Application
 			public void handle(ActionEvent event) 
 			{
 				// Choose random integer between 1 to 3
-				int spawnPowerup = rnd.nextInt(3) + 1;
+				int spawnPowerup = rnd.nextInt(7) + 1;
 				
 				// If random number is 1, spawn star powerup
 				if (spawnPowerup == 1)
@@ -1221,6 +1277,30 @@ public class Main extends Application
 					fuels.add(new Fuel());
 					fuels.get(fuels.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
 					root.getChildren().add(fuels.get(fuels.size()-1).getImage());
+				}
+				else if (spawnPowerup == 4)
+				{
+					lightnings.add(new Lightning());
+					lightnings.get(lightnings.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
+					root.getChildren().add(lightnings.get(lightnings.size()-1).getImage());
+				}
+				else if (spawnPowerup == 5)
+				{
+					lightnings.add(new Lightning());
+					lightnings.get(lightnings.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
+					root.getChildren().add(lightnings.get(lightnings.size()-1).getImage());
+				}
+				else if (spawnPowerup == 6)
+				{
+					lightnings.add(new Lightning());
+					lightnings.get(lightnings.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
+					root.getChildren().add(lightnings.get(lightnings.size()-1).getImage());
+				}
+				else if (spawnPowerup == 7)
+				{
+					lightnings.add(new Lightning());
+					lightnings.get(lightnings.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
+					root.getChildren().add(lightnings.get(lightnings.size()-1).getImage());
 				}
 			}
 		});
@@ -1413,10 +1493,10 @@ public class Main extends Application
 	}
 	
 	// Method that creates a timer for the cooldown of shooting bullets
-	public void limitBullets()
+	public void limitBullets(double milli)
 	{
 		// Create new keyframe object with a 1250 ms delay that limits bullets
-		KeyFrame kfLimitBullets = new KeyFrame(Duration.millis(1250), new EventHandler<ActionEvent>()
+		KeyFrame kfLimitBullets = new KeyFrame(Duration.millis(milli), new EventHandler<ActionEvent>()
 		{
 			public void handle(ActionEvent event) 
 			{

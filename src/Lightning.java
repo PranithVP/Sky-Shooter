@@ -2,35 +2,35 @@ import java.util.Random;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Star 
+public class Lightning 
 {
 	// Declare and initialize global variables
 	private double xPos, yPos, width, height;
-	private Image imgStar;
-	private ImageView ivStar;
+	private Image imgLightning;
+	private ImageView ivLightning;
 	private Random rnd;
 	
-	// Constructor for star class
-	Star()
+	// Constructor for lightning class
+	Lightning()
 	{
 		// Initialize random object
 		rnd = new Random();
 		
-		// Initialize image and imageview of star, use image for imageview
-		imgStar = new Image("file:images\\star.png");
-		ivStar = new ImageView(imgStar);
+		// Initialize image and imageview of lightning, use image for imageview
+		imgLightning = new Image("file:images\\lightning.png");
+		ivLightning = new ImageView(imgLightning);
 		
 		// Assign default value for x and y position
 		xPos = 0;
 		yPos = 0;
 		
-		// Set width and height of star
-		width = imgStar.getWidth();
-		height = imgStar.getHeight();
+		// Set width and height of lightning
+		width = imgLightning.getWidth();
+		height = imgLightning.getHeight();
 		
 		// Set x and y position of imageview
-		ivStar.setX(xPos);
-		ivStar.setY(yPos);
+		ivLightning.setX(xPos);
+		ivLightning.setY(yPos);
 	}
 	
 	// Method that sets x position
@@ -38,7 +38,7 @@ public class Star
 	{
 		// Set x position, update x position of imageview
 		xPos = x;
-		ivStar.setX(xPos);
+		ivLightning.setX(xPos);
 	}
 	
 	// Method that sets y position
@@ -46,7 +46,7 @@ public class Star
 	{
 		// Set y position, update y position of imageview
 		yPos = y;
-		ivStar.setY(yPos);
+		ivLightning.setY(yPos);
 	}
 	
 	// Method that sets location
@@ -57,8 +57,8 @@ public class Star
 		yPos = 0 - height;
 		
 		// Update x and y position of imageview
-		ivStar.setX(xPos);
-		ivStar.setY(yPos);
+		ivLightning.setX(xPos);
+		ivLightning.setY(yPos);
 	}
 	
 	// Method that returns x position
@@ -66,7 +66,7 @@ public class Star
 	{
 		return xPos;
 	}
-	
+
 	// Method that returns y position
 	public double getY()
 	{
@@ -88,14 +88,14 @@ public class Star
 	// Method that returns imageview
 	public ImageView getImage()
 	{
-		return ivStar;
+		return ivLightning;
 	}
 	
-	// Method that moves star down
+	// Method that moves lightning down
 	public void move()
 	{
 		// Set y position, update y position of image view
 		yPos += 3;
-		ivStar.setY(yPos);
+		ivLightning.setY(yPos);
 	}
 }

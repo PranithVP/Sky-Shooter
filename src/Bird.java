@@ -1,7 +1,4 @@
-
-
 import java.util.Random;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
