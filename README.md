@@ -26,7 +26,7 @@ Enjoy!
 
 ## v1.1
 
-* Added fuel powerup.
+* Added lightning powerup.
 * Username no longer needs to be entered in multiple times.
 * Extended duration of bird spawns.
 * Changed fuel and heart sprites.
