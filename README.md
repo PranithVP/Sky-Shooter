@@ -26,8 +26,8 @@ Enjoy!
 
 ## v1.1
 
-* Added lightning powerup.
-* Username no longer needs to be entered in multiple times.
-* Extended duration of bird spawns.
-* Changed fuel, heart, and star sprites.
-* Removed unnecessary files.
+- Added lightning powerup.
+- Username no longer needs to be entered in multiple times.
+- Extended duration of bird spawns.
+- Changed fuel, heart, and star sprites.
+- Removed unnecessary files.
