@@ -53,7 +53,7 @@ public class Main extends Application
 	private Timeline airplaneMoveTimer, moveTimer, birdSpawnTimer, asteroidSpawnTimer, increaseSpeedTimer, powerupSpawnTimer, limitBulletTimer, lightningTimer;
 	private int score, seconds, highScore, highestValueIndex, thirdSeconds;
 	private double health, asteroidSpeedX, asteroidSpeedY, asteroidSpawnSpeed, aircraftSpeed;
-	private boolean goUp, goDown, goLeft, goRight, space, noBirds, reachedFinalSpeed, limitBullets;
+	private boolean goUp, goDown, goLeft, goRight, space, noBirds, reachedFinalSpeed, limitingBullets, activeLightning;
 	private ArrayList<Bird> birds;
 	private ArrayList<Asteroid> asteroids;
 	private ArrayList<Star> stars;
@@ -545,7 +545,7 @@ public class Main extends Application
 		space = false;
 		noBirds = true;
 		reachedFinalSpeed = false;
-		limitBullets = false;
+		limitingBullets = false;
 		
 		// Initialize random object
 		rnd = new Random();
@@ -915,6 +915,7 @@ public class Main extends Application
 						{
 							public void handle(ActionEvent arg0) 
 							{
+								activeLightning = true;
 								thirdSeconds++;
 								bullets.add(new Bullet());
 								bullets.get(bullets.size()-1).setLocationAndDirection(aircraft.getX(), aircraft.getY(), aircraft.getWidth(), aircraft.getHeight(), aircraft.getDirection());
@@ -922,12 +923,13 @@ public class Main extends Application
 
 								if (thirdSeconds > 54)
 								{
+									activeLightning = false;
 									lightningTimer.stop();
 									thirdSeconds = 0;
 								}
 							}
 						});
-						limitBullets = true;
+						limitingBullets = true;
 						limitBullets(18000);
 						lightningTimer = new Timeline(kfLightning);
 						lightningTimer.setCycleCount(Timeline.INDEFINITE);
@@ -949,9 +951,13 @@ public class Main extends Application
 					birdSpawnTimer.stop();
 					increaseSpeedTimer.stop();
 					powerupSpawnTimer.stop();
-					if (space == true)
+					if (space)
 					{
 						asteroidSpawnTimer.stop();
+					}
+					if (activeLightning)
+					{
+						lightningTimer.stop();
 					}
 					
 					// Call gameOver method for user's name and score
@@ -1002,14 +1008,14 @@ public class Main extends Application
 						if (e.getCode() == KeyCode.SPACE)
 						{
 							// Check if bullet cooldown is not active
-							if (limitBullets == false)
+							if (!limitingBullets)
 							{
 								// Add new bullet to arraylist, set location and direction, add to root,
-								// set cooldown "limitBullets" to true, call limitBullets method
+								// set cooldown "limitingBullets" to true, call limitBullets method
 								bullets.add(new Bullet());
 								bullets.get(bullets.size()-1).setLocationAndDirection(aircraft.getX(), aircraft.getY(), aircraft.getWidth(), aircraft.getHeight(), aircraft.getDirection());
 								root.getChildren().add(bullets.get(bullets.size()-1).getImage());
-								limitBullets = true;
+								limitingBullets = true;
 								limitBullets(1250);
 							}
 						}
@@ -1500,8 +1506,8 @@ public class Main extends Application
 		{
 			public void handle(ActionEvent event) 
 			{
-				// Sets limitBullets variable to false, so bullet cooldown ends every 1.25 seconds after the bullet is shot
-				limitBullets = false;
+				// Sets limitingBullets variable to false, so bullet cooldown ends every 1.25 seconds after the bullet is shot
+				limitingBullets = false;
 			}
 		});
 		// Initialize timeline limitBulletTimer for new keyframe, play once
