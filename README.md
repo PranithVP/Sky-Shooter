@@ -22,7 +22,7 @@ Enjoy!
 
 ## v1.0
 
-* First official Sky Shooter release.
+- First official Sky Shooter release.
 
 ## v1.1
 
