@@ -1,7 +1,7 @@
 # Sky Shooter
 A JavaFX game where an aircraft must avoid birds and asteroids.
 
-The controls involve for WASD for movement and spacebar for shooting. Shooting objects give an additional score boost, although it is optional. The powerups include:
+The controls involve for WASD for movement and spacebar for shooting. Shooting objects give an additional score boost, although it is optional. The game first starts off with birds spawning at various speeds. Eventually, the game transitions into a space setting with asteroids spawning at an increasing frequency. The powerups include:
 
 * Heart - Recovers 20% of the player's health
 * Fuel - Increases the aircraft's speed
@@ -17,3 +17,16 @@ Here are the installation steps:
 3. Run the run.bat file. 
 
 Enjoy!
+
+# Changelog
+
+## v1.0
+
+* First official Sky Shooter release.
+
+## v1.1
+
+* Added fuel powerup.
+* Username no longer needs to be entered in multiple times.
+* Extended duration of bird spawns.
+* Removed unnecessary files.
