@@ -122,7 +122,7 @@ public class Main extends Application
 				// Create an alert informing the user of the controls and how to play, show alert
 				Alert alert = new Alert(AlertType.INFORMATION);
 				alert.setTitle("HOW TO PLAY");
-				alert.setContentText("Use WASD to move, and spacebar to shoot bullets. "
+				alert.setContentText("Use WASD for movement and spacebar to shoot bullets. "
 						+ "\n\nThe objective is to dodge and shoot obstacles for as long as possible. "
 						+ "Shooting has a cooldown of 1.25 seconds, and extra points are added if "
 						+ "an obstacle is shot rather than dodged. \n\nThe heart powerup adds 20% more "
@@ -1258,7 +1258,7 @@ public class Main extends Application
 			public void handle(ActionEvent event) 
 			{
 				// Choose random integer between 1 to 3
-				int spawnPowerup = rnd.nextInt(7) + 1;
+				int spawnPowerup = rnd.nextInt(4) + 1;
 				
 				// If random number is 1, spawn star powerup
 				if (spawnPowerup == 1)
@@ -1285,24 +1285,6 @@ public class Main extends Application
 					root.getChildren().add(fuels.get(fuels.size()-1).getImage());
 				}
 				else if (spawnPowerup == 4)
-				{
-					lightnings.add(new Lightning());
-					lightnings.get(lightnings.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
-					root.getChildren().add(lightnings.get(lightnings.size()-1).getImage());
-				}
-				else if (spawnPowerup == 5)
-				{
-					lightnings.add(new Lightning());
-					lightnings.get(lightnings.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
-					root.getChildren().add(lightnings.get(lightnings.size()-1).getImage());
-				}
-				else if (spawnPowerup == 6)
-				{
-					lightnings.add(new Lightning());
-					lightnings.get(lightnings.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
-					root.getChildren().add(lightnings.get(lightnings.size()-1).getImage());
-				}
-				else if (spawnPowerup == 7)
 				{
 					lightnings.add(new Lightning());
 					lightnings.get(lightnings.size()-1).setLocation(inGame.getWidth(), inGame.getHeight());
