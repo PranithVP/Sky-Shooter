@@ -13,7 +13,7 @@ The game is endless, and all scores are recorded into a text file.
 # Installation
 Here are the installation steps:
 1. Install [Java SE Development Kit 18.0.2.1](https://www.oracle.com/java/technologies/downloads/#jdk18-windows)
-2. Download [Sky Shooter v1.1.zip](https://github.com/PranithVP/Sky-Shooter/tree/main/downloads)
+2. Download and extract [Sky Shooter v1.1.zip](https://github.com/PranithVP/Sky-Shooter/tree/main/downloads)
 3. Run the "run.bat" file
 
 Enjoy!
