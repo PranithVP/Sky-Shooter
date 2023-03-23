@@ -12,7 +12,7 @@ The game is endless, and all scores are recorded into a text file.
 
 # Gameplay
 
-![Screenshot_1](https://user-images.githubusercontent.com/110805848/227341422-82cec206-2d71-4ae0-a400-45d07d1a78ab.jpg)
+![Screenshot_1](https://user-images.githubusercontent.com/110805848/227341422-82cec206-2d71-4ae0-a400-45d07d1a78ab.jpg width = "100" height "100")
 ![Screenshot_2](https://user-images.githubusercontent.com/110805848/227341476-85e20d13-5972-47d9-8410-b886722262bf.jpg)
 ![Screenshot_4](https://user-images.githubusercontent.com/110805848/227341501-1ca56124-0183-4153-9bb8-90b52a7b55c1.jpg)
 ![Screenshot_5](https://user-images.githubusercontent.com/110805848/227341536-1264b5cd-079b-4687-bfbc-0b45f11be5b6.jpg)
