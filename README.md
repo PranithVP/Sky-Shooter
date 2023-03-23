@@ -13,6 +13,9 @@ The game is endless, and all scores are recorded into a text file.
 # Gameplay
 
 ![Screenshot_1](https://user-images.githubusercontent.com/110805848/227341422-82cec206-2d71-4ae0-a400-45d07d1a78ab.jpg)
+
+![Screenshot_2](https://user-images.githubusercontent.com/110805848/227342173-0eb2c6d6-de72-4698-b423-954a8e21e80e.jpg)
+
 ![Screenshot_5](https://user-images.githubusercontent.com/110805848/227341536-1264b5cd-079b-4687-bfbc-0b45f11be5b6.jpg)
 
 # Installation
