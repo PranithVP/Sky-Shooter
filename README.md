@@ -14,9 +14,13 @@ The game is endless, and all scores are recorded into a text file.
 
 ![Screenshot_1](https://user-images.githubusercontent.com/110805848/227341422-82cec206-2d71-4ae0-a400-45d07d1a78ab.jpg)
 
-![Screenshot_2](https://user-images.githubusercontent.com/110805848/227342173-0eb2c6d6-de72-4698-b423-954a8e21e80e.jpg)
+![Screenshot_2](https://github.com/PranithVP/Sky-Shooter/assets/110805848/4b34b84e-f2bc-4656-8a59-133da3ca23e6)
 
-![Screenshot_5](https://user-images.githubusercontent.com/110805848/227341536-1264b5cd-079b-4687-bfbc-0b45f11be5b6.jpg)
+![Screenshot_3](https://user-images.githubusercontent.com/110805848/227342173-0eb2c6d6-de72-4698-b423-954a8e21e80e.jpg)
+
+![Screenshot_4](https://user-images.githubusercontent.com/110805848/227341536-1264b5cd-079b-4687-bfbc-0b45f11be5b6.jpg)
+
+![Screenshot_5](https://github.com/PranithVP/Sky-Shooter/assets/110805848/5fc2a30b-e7a8-4476-bc8a-d6d908d50c47)
 
 # Installation
 Here are the installation steps:
@@ -34,8 +38,8 @@ Enjoy!
 
 ## v1.1
 
-- Added lightning powerup.
-- Username no longer needs to be entered in multiple times.
+- Added lightning power-up.
+- Username no longer needs to be entered multiple times per session.
 - Extended duration of bird spawns.
 - Changed fuel, heart, and star sprites.
 - Removed unnecessary files.
