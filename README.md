@@ -1,14 +1,14 @@
 # Sky Shooter
-A JavaFX game where an aircraft must avoid birds and asteroids.
+A JavaFX game where the user controls an aircraft with the objective of avoiding birds and asteroids.
 
-The controls involve WASD for movement and spacebar for shooting. Shooting objects gives the user an additional score boost, although optional. The game first starts off with birds spawning at various speeds. Eventually, the game transitions into a space setting accompanying asteroids spawning with varying speed and direction along with an increasing speed and frequency. The powerups include:
+The controls involve WASD for movement and spacebar for shooting. Shooting objects gives the user an additional score boost, although optional. The game first starts off with birds spawning at various speeds. Eventually, the game transitions into a space setting accompanying asteroids spawning with varying speeds and directions and increasing frequency and speed. The powerups include:
 
 - Heart - Recovers 20% of the player's health.
 - Fuel - Increases the aircraft's speed.
 - Star - Adds a randomly chosen amount to the player's score.
 - Lightning - Rapid fires bullets three times a second for an interval of eighteen seconds.
 
-The game is endless, and all scores are recorded into a text file.
+The game is endless. All scores are recorded in a text file.
 
 # Gameplay
 
